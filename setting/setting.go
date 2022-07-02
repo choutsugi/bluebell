@@ -51,7 +51,7 @@ type RedisConfig struct {
 var Conf = new(Config)
 
 func Init() (err error) {
-	filePath := flag.String("config", "./config/config.yaml", "config.yaml")
+	filePath := flag.String("conf", "./config/config.yaml", "config path, eg: -conf config.yaml")
 
 	flag.Parse()
 	viper.SetConfigFile(*filePath)
