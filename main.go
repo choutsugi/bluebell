@@ -3,7 +3,9 @@ package main
 import (
 	"bluebell/dao/mysql"
 	"bluebell/dao/redis"
+	"bluebell/logger"
 	"bluebell/setting"
+	"go.uber.org/zap"
 )
 
 func main() {
@@ -19,4 +21,9 @@ func main() {
 		panic(err)
 	}
 
+	if err := logger.InitLogger(setting.Conf.Log); err != nil {
+		panic(err)
+	}
+
+	zap.L().Info("init success")
 }
