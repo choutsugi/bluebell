@@ -1,17 +1,25 @@
 package redis
 
-import "github.com/go-redis/redis"
+import (
+	"bluebell/setting"
+	"fmt"
+	"github.com/go-redis/redis"
+)
 
 var RDB *redis.Client
 
-func InitClient() (err error) {
+func InitRDB(config *setting.RedisConfig) (err error) {
 	RDB = redis.NewClient(&redis.Options{
-		Addr:     "localhost:6379",
-		Password: "dangerous",
-		DB:       0,
-		PoolSize: 100,
+		Addr:     fmt.Sprintf("%s:%d", config.Host, config.Port),
+		Password: config.Password,
+		DB:       config.Db,
+		PoolSize: config.PoolSize,
 	})
 
 	_, err = RDB.Ping().Result()
 	return
+}
+
+func Close() {
+	RDB.Close()
 }

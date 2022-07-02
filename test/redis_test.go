@@ -6,7 +6,7 @@ import (
 )
 
 func TestGoRedis(t *testing.T) {
-	if err := redis.InitClient(); err != nil {
+	if err := redis.InitRDB(); err != nil {
 		t.Error(err)
 	}
 }
