@@ -25,8 +25,8 @@ func InitDB(config *setting.DbConfig) (err error) {
 		return
 	}
 
-	DB.SetMaxOpenConns(200)
-	DB.SetConnMaxIdleTime(10)
+	DB.SetMaxOpenConns(config.MaxOpenCons)
+	DB.SetMaxIdleConns(config.MaxIdleCons)
 
 	return
 }
