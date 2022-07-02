@@ -10,7 +10,7 @@ import (
 type Config struct {
 	App   *AppConfig   `mapstructure:"app"`
 	Log   *LogConfig   `mapstructure:"log"`
-	MySQL *MySQLConfig `mapstructure:"mysql"`
+	Db    *DbConfig    `mapstructure:"db"`
 	Redis *RedisConfig `mapstructure:"redis"`
 }
 
@@ -29,7 +29,8 @@ type LogConfig struct {
 	MaxBackups int    `mapstructure:"max_backups"`
 }
 
-type MySQLConfig struct {
+type DbConfig struct {
+	DriveName   string `mapstructure:"drive_name"`
 	Host        string `mapstructure:"host"`
 	User        string `mapstructure:"user"`
 	Password    string `mapstructure:"password"`
