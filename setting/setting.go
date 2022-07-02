@@ -8,10 +8,11 @@ import (
 )
 
 type Config struct {
-	App   *AppConfig   `mapstructure:"app"`
-	Log   *LogConfig   `mapstructure:"log"`
-	Db    *DbConfig    `mapstructure:"db"`
-	Redis *RedisConfig `mapstructure:"redis"`
+	App       *AppConfig       `mapstructure:"app"`
+	Log       *LogConfig       `mapstructure:"log"`
+	Db        *DbConfig        `mapstructure:"db"`
+	Redis     *RedisConfig     `mapstructure:"redis"`
+	SnowFlake *SnowFlakeConfig `mapstructure:"snowflake"`
 }
 
 type AppConfig struct {
@@ -46,6 +47,11 @@ type RedisConfig struct {
 	Port     int    `mapstructure:"port"`
 	Db       int    `mapstructure:"db"`
 	PoolSize int    `mapstructure:"pool_size"`
+}
+
+type SnowFlakeConfig struct {
+	StartTime string `mapstructure:"start_time"`
+	MachineId int64  `mapstructure:"machine_id"`
 }
 
 var Conf = new(Config)
