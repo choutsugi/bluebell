@@ -7,7 +7,7 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
-var DB *sqlx.DB
+var db *sqlx.DB
 
 func InitDB(config *setting.DbConfig) (err error) {
 
@@ -19,14 +19,14 @@ func InitDB(config *setting.DbConfig) (err error) {
 		config.DbName,
 	)
 
-	DB, err = sqlx.Connect(config.DriveName, dsn)
+	db, err = sqlx.Connect(config.DriveName, dsn)
 	if err != nil {
 		fmt.Println("connect to mysql failed, err:", err)
 		return
 	}
 
-	DB.SetMaxOpenConns(config.MaxOpenCons)
-	DB.SetMaxIdleConns(config.MaxIdleCons)
+	db.SetMaxOpenConns(config.MaxOpenCons)
+	db.SetMaxIdleConns(config.MaxIdleCons)
 
 	return
 }

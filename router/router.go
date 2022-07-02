@@ -1,6 +1,7 @@
 package router
 
 import (
+	v1 "bluebell/controller/v1"
 	"bluebell/middlerware"
 	"github.com/gin-gonic/gin"
 	"net/http"
@@ -16,6 +17,8 @@ func InitRouter() *gin.Engine {
 			"msg": "Page Not Found",
 		})
 	})
+
+	r.POST("/api/v1/user/register", v1.RegisterHandler)
 
 	return r
 }

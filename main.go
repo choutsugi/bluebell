@@ -5,6 +5,8 @@ import (
 	"bluebell/dao/redis"
 	"bluebell/logger"
 	"bluebell/pkg/snowflake"
+	"bluebell/pkg/validator"
+	"bluebell/router"
 	"bluebell/setting"
 	"fmt"
 	"go.uber.org/zap"
@@ -34,5 +36,14 @@ func main() {
 		zap.L().Panic("Init snowflake error", zap.Error(err))
 	}
 
-	fmt.Println(snowflake.GenerateID())
+	if err = validator.InitTrans("zh"); err != nil {
+		zap.L().Fatal("Init translator failed", zap.Error(err))
+		return
+	}
+
+	app := router.InitRouter()
+	err = app.Run(fmt.Sprintf(":%d", setting.Conf.App.Port))
+	if err != nil {
+		panic(err)
+	}
 }
