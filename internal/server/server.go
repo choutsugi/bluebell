@@ -2,6 +2,7 @@ package server
 
 import (
 	"bluebell/internal/conf"
+	"bluebell/pkg/logger"
 	"bluebell/router"
 	"context"
 	"github.com/gin-gonic/gin"
@@ -19,6 +20,9 @@ type Server struct {
 }
 
 func (srv *Server) Run() {
+
+	defer logger.Sync()
+
 	s := http.Server{
 		Addr:    srv.addr,
 		Handler: srv.handler,
@@ -43,6 +47,19 @@ func (srv *Server) Run() {
 }
 
 func NewServer(c *conf.Bootstrap) *Server {
+
+	//初始化日志
+	config := logger.Config{
+		Level:      c.Log.Level,
+		FileName:   c.Log.FileName,
+		MaxSize:    c.Log.MaxSize,
+		MaxAge:     c.Log.MaxAge,
+		MaxBackups: c.Log.MaxBackups,
+	}
+	if err := logger.Init(config); err != nil {
+		panic(err)
+	}
+
 	srv := &Server{
 		addr:    c.App.Addr,
 		handler: router.InitRouter(),
