@@ -1,10 +1,11 @@
 package middlerware
 
 import (
+	"bluebell/internal/pkg/errx"
+	"bluebell/internal/pkg/result"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 	"net"
-	"net/http"
 	"net/http/httputil"
 	"os"
 	"runtime/debug"
@@ -50,7 +51,7 @@ func Recovery(stack bool) gin.HandlerFunc {
 						zap.String("request", string(httpRequest)),
 					)
 				}
-				c.AbortWithStatus(http.StatusInternalServerError)
+				result.Error(c, errx.ErrInternalServerError)
 			}
 		}()
 		c.Next()
