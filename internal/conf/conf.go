@@ -12,6 +12,7 @@ type Bootstrap struct {
 	Log       *Log       `mapstructure:"log"`
 	Data      *Data      `mapstructure:"data"`
 	SnowFlake *SnowFlake `mapstructure:"snowflake"`
+	Jwt       *Jwt       `mapstructure:"jwt"`
 }
 
 type App struct {
@@ -47,6 +48,17 @@ type DataSource struct {
 type SnowFlake struct {
 	StartTime string `mapstructure:"start_time"`
 	MachineId int64  `mapstructure:"machine_id"`
+}
+
+type Jwt struct {
+	TokenType            string        `mapstructure:"token_type"`
+	Issuer               string        `mapstructure:"issuer"`
+	Secret               string        `mapstructure:"secret"`
+	TTL                  time.Duration `mapstructure:"ttl"`                    // 有效时间
+	BlacklistKeyPrefix   string        `mapstructure:"blacklist_key_prefix"`   // 黑名单Key前缀
+	BlacklistGracePeriod time.Duration `mapstructure:"blacklist_grace_period"` // 黑名单宽限时间（避免并发请求失败）
+	RefreshGracePeriod   time.Duration `mapstructure:"refresh_grace_period"`
+	RefreshLockName      string        `mapstructure:"refresh_lock_name"`
 }
 
 var Boot = new(Bootstrap)

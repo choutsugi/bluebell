@@ -33,7 +33,18 @@ func (api *userApi) Signup(ctx *gin.Context) {
 }
 
 func (api *userApi) Login(ctx *gin.Context) {
+	var req schema.UserLoginRequest
+	if err := ctx.ShouldBind(&req); err != nil {
+		result.Error(ctx, err)
+		return
+	}
 
+	resp, err := api.service.Login(&req)
+	if err != nil {
+		result.Error(ctx, err)
+	}
+
+	result.Success(ctx, resp)
 }
 
 func newUserApi(userService service.UserService) UserApi {

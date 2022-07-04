@@ -22,3 +22,13 @@ data:
 snowflake:
   start_time: "2021-10-25"
   machine_id: 1
+
+jwt:
+  token_type: "bearer"
+  issuer: "bluebell"
+  secret: "нανє α ηι¢є ∂αу!"
+  ttl: 86400s
+  blacklist_key_prefix: "JWT_BLACKLIST_"
+  blacklist_grace_period: 10s
+  refresh_grace_period: 14400s
+  refresh_lock_name: "REFRESH_LOCKER"

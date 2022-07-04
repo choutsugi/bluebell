@@ -4,6 +4,7 @@ import (
 	v1 "bluebell/api/v1"
 	"bluebell/internal/conf"
 	"bluebell/internal/data"
+	"bluebell/internal/pkg/auth"
 	"bluebell/internal/repository"
 	"bluebell/internal/router"
 	"bluebell/internal/service"
@@ -54,14 +55,14 @@ func (srv *Server) Run() {
 func NewServer(c *conf.Bootstrap) *Server {
 
 	//初始化日志
-	config := logger.Config{
+	logConfig := logger.Config{
 		Level:      c.Log.Level,
 		FileName:   c.Log.FileName,
 		MaxSize:    c.Log.MaxSize,
 		MaxAge:     c.Log.MaxAge,
 		MaxBackups: c.Log.MaxBackups,
 	}
-	if err := logger.Init(config); err != nil {
+	if err := logger.Init(logConfig); err != nil {
 		panic(err)
 	}
 
@@ -74,6 +75,19 @@ func NewServer(c *conf.Bootstrap) *Server {
 	dataSource := data.NewDataSource(c.Data.DataSource)
 	cache := data.NewCache(c.Data.Cache)
 	database := data.NewData(dataSource, cache)
+
+	//初始化jwt
+	jwtConfig := auth.Config{
+		TokenType:            c.Jwt.TokenType,
+		Issuer:               c.Jwt.Issuer,
+		Secret:               c.Jwt.Secret,
+		TTL:                  c.Jwt.TTL,
+		BlacklistKeyPrefix:   c.Jwt.BlacklistKeyPrefix,
+		BlacklistGracePeriod: c.Jwt.BlacklistGracePeriod,
+		RefreshGracePeriod:   c.Jwt.RefreshGracePeriod,
+		RefreshLockName:      c.Jwt.RefreshLockName,
+	}
+	auth.Init(jwtConfig, cache)
 
 	userRepo := repository.NewUserRepo(database.DB)
 	userService := service.NewUserService(userRepo)

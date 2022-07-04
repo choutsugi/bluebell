@@ -2,6 +2,7 @@ package repository
 
 import (
 	"bluebell/internal/entity"
+	"bluebell/internal/pkg/errx"
 	"gorm.io/gorm"
 )
 
@@ -11,10 +12,22 @@ type UserRepo interface {
 	IsDuplicateUsername(username string) bool
 	IsDuplicateEmail(email string) bool
 	InsertUser(user *entity.User) error
+	FetchUserByEmail(email string) (*entity.User, error)
 }
 
 type userRepo struct {
 	db *gorm.DB
+}
+
+func (r *userRepo) FetchUserByEmail(email string) (*entity.User, error) {
+	var user entity.User
+	if err := r.db.Where("email = ?", email).First(&user).Error; err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return nil, errx.ErrEmailInvalid
+		}
+		return nil, err
+	}
+	return &user, nil
 }
 
 func (r *userRepo) InsertUser(user *entity.User) error {
