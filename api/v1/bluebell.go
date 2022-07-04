@@ -1,8 +1,13 @@
 package v1
 
-type Controller struct {
+import "bluebell/internal/service"
+
+type Api struct {
+	User UserApi
 }
 
-func RegisterService() Controller {
-	return Controller{}
+func Register(userService service.UserService) Api {
+	return Api{
+		User: newUserApi(userService),
+	}
 }

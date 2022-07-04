@@ -1,9 +1,12 @@
 package server
 
 import (
+	v1 "bluebell/api/v1"
 	"bluebell/internal/conf"
 	"bluebell/internal/data"
+	"bluebell/internal/repository"
 	"bluebell/internal/router"
+	"bluebell/internal/service"
 	"bluebell/pkg/logger"
 	"context"
 	"github.com/gin-gonic/gin"
@@ -64,11 +67,16 @@ func NewServer(c *conf.Bootstrap) *Server {
 	//建立数据库连接
 	db := data.NewDataSource(c.Data.DataSource)
 	rdb := data.NewCache(c.Data.Cache)
-	_ = data.NewData(db, rdb)
+	database := data.NewData(db, rdb)
+
+	userRepo := repository.NewUserRepo(database.DB)
+	userService := service.NewUserService(userRepo)
+
+	api := v1.Register(userService)
 
 	srv := &Server{
 		addr:    c.App.Addr,
-		handler: router.Setup(),
+		handler: router.Setup(api),
 	}
 	return srv
 }
