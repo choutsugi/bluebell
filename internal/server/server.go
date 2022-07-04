@@ -2,8 +2,8 @@ package server
 
 import (
 	"bluebell/internal/conf"
+	"bluebell/internal/router"
 	"bluebell/pkg/logger"
-	"bluebell/router"
 	"context"
 	"github.com/gin-gonic/gin"
 	"log"
@@ -62,7 +62,7 @@ func NewServer(c *conf.Bootstrap) *Server {
 
 	srv := &Server{
 		addr:    c.App.Addr,
-		handler: router.InitRouter(),
+		handler: router.Setup(),
 	}
 	return srv
 }
