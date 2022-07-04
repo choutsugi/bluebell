@@ -2,6 +2,7 @@ package server
 
 import (
 	"bluebell/internal/conf"
+	"bluebell/internal/data"
 	"bluebell/internal/router"
 	"bluebell/pkg/logger"
 	"context"
@@ -59,6 +60,11 @@ func NewServer(c *conf.Bootstrap) *Server {
 	if err := logger.Init(config); err != nil {
 		panic(err)
 	}
+
+	//建立数据库连接
+	db := data.NewDataSource(c.Data.DataSource)
+	rdb := data.NewCache(c.Data.Cache)
+	_ = data.NewData(db, rdb)
 
 	srv := &Server{
 		addr:    c.App.Addr,

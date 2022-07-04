@@ -2,6 +2,7 @@ package data
 
 import (
 	"bluebell/internal/conf"
+	"bluebell/internal/entity"
 	"github.com/go-redis/redis"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -29,7 +30,9 @@ func NewDataSource(c *conf.DataSource) *gorm.DB {
 		log.Panicf("failed to establish connection with database: %v", err)
 	}
 
-	//db.AutoMigrate()
+	if err = db.AutoMigrate(&entity.User{}); err != nil {
+		log.Panicf("failed to migrate table to database: %v", err)
+	}
 	return db
 }
 
