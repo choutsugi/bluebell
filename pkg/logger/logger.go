@@ -1,21 +1,28 @@
 package logger
 
 import (
-	"bluebell/setting"
 	"github.com/natefinch/lumberjack"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 	"os"
 )
 
-func InitLogger(config *setting.LogConfig) (err error) {
+type Config struct {
+	Level      string
+	FileName   string
+	MaxSize    int
+	MaxAge     int
+	MaxBackups int
+}
 
-	level, err := getLevel(config.Level)
+func Init(c Config) (err error) {
+
+	level, err := getLevel(c.Level)
 	if err != nil {
 		return
 	}
 
-	fileWriter := getFileWriter(config.FileName, config.MaxSize, config.MaxBackups, config.MaxAge)
+	fileWriter := getFileWriter(c.FileName, c.MaxSize, c.MaxBackups, c.MaxAge)
 	stdoutWriter := getStdoutWriter()
 
 	jsonEncoder := getJsonEncoder()
