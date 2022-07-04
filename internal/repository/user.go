@@ -26,7 +26,7 @@ func (r *userRepo) IsDuplicateUsername(username string) bool {
 }
 
 func (r *userRepo) IsDuplicateEmail(email string) bool {
-	return r.db.Where("username = ?", email).First(&entity.User{}).Error == nil
+	return r.db.Where("email = ?", email).First(&entity.User{}).Error == nil
 }
 
 func NewUserRepo(db *gorm.DB) UserRepo {
