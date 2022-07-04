@@ -3,12 +3,14 @@ package test
 import (
 	"bluebell/internal/conf"
 	"bluebell/pkg/logger"
+	"flag"
 	"go.uber.org/zap"
 	"testing"
 )
 
 func TestLog(t *testing.T) {
-	if err := conf.Load(); err != nil {
+	flag.Parse()
+	if err := conf.Load(flagConf); err != nil {
 		t.Error(err)
 	}
 

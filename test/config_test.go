@@ -2,20 +2,18 @@ package test
 
 import (
 	"bluebell/internal/conf"
+	"flag"
 	"fmt"
 	"testing"
 )
 
 func TestConfig(t *testing.T) {
 
-	if err := conf.Load(); err != nil {
+	flag.Parse()
+	if err := conf.Load(flagConf); err != nil {
 		t.Error(err)
 	}
 
-	fmt.Println(*conf.Boot.App)
-	fmt.Println(*conf.Boot.Log)
-	fmt.Println(*conf.Boot.Data.Cache)
-	fmt.Println(*conf.Boot.Data.DataSource)
-	fmt.Println(*conf.Boot.SnowFlake)
+	fmt.Println(conf.Boot)
 
 }

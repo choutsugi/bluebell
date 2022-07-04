@@ -3,11 +3,13 @@ package test
 import (
 	"bluebell/internal/conf"
 	"bluebell/internal/data"
+	"flag"
 	"testing"
 )
 
 func TestCache(t *testing.T) {
-	if err := conf.Load(); err != nil {
+	flag.Parse()
+	if err := conf.Load(flagConf); err != nil {
 		t.Error(err)
 	}
 
@@ -15,7 +17,8 @@ func TestCache(t *testing.T) {
 }
 
 func TestDataSource(t *testing.T) {
-	if err := conf.Load(); err != nil {
+	flag.Parse()
+	if err := conf.Load(flagConf); err != nil {
 		t.Error(err)
 	}
 
