@@ -8,6 +8,7 @@ import (
 	"bluebell/internal/router"
 	"bluebell/internal/service"
 	"bluebell/pkg/logger"
+	"bluebell/pkg/snowflake"
 	"context"
 	"github.com/gin-gonic/gin"
 	"log"
@@ -64,10 +65,15 @@ func NewServer(c *conf.Bootstrap) *Server {
 		panic(err)
 	}
 
+	//初始化雪花算法
+	if err := snowflake.Init(c.SnowFlake.StartTime, c.SnowFlake.MachineId); err != nil {
+		panic(err)
+	}
+
 	//建立数据库连接
-	db := data.NewDataSource(c.Data.DataSource)
-	rdb := data.NewCache(c.Data.Cache)
-	database := data.NewData(db, rdb)
+	dataSource := data.NewDataSource(c.Data.DataSource)
+	cache := data.NewCache(c.Data.Cache)
+	database := data.NewData(dataSource, cache)
 
 	userRepo := repository.NewUserRepo(database.DB)
 	userService := service.NewUserService(userRepo)

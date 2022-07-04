@@ -6,6 +6,7 @@ import (
 	"bluebell/internal/repository"
 	"bluebell/internal/schema"
 	"bluebell/pkg/encrypt"
+	"bluebell/pkg/snowflake"
 )
 
 var _ UserService = (*userService)(nil)
@@ -28,16 +29,17 @@ func (s *userService) Signup(req *schema.UserSignupRequest) (err error) {
 		return errx.ErrEmailHasRegistered
 	}
 
-	user := new(entity.User)
-	user.Username = req.Username
-	user.Email = req.Email
-
+	user := entity.User{
+		Uid:      snowflake.GenerateID(),
+		Username: req.Username,
+		Email:    req.Email,
+	}
 	user.Password, user.Salt, err = encrypt.Encrypt(req.Password)
 	if err != nil {
 		return err
 	}
 
-	return s.repo.InsertUser(user)
+	return s.repo.InsertUser(&user)
 }
 
 func NewUserService(repo repository.UserRepo) UserService {
