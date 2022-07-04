@@ -55,7 +55,7 @@ type SnowFlake struct {
 var Boot = new(Bootstrap)
 
 func Load() (err error) {
-	filePath := flag.String("conf", "../configs/config.yaml", "config path, eg: -conf config.yaml")
+	filePath := flag.String("conf", "configs/config.yaml", "config path, eg: -conf config.yaml")
 
 	flag.Parse()
 	viper.SetConfigFile(*filePath)
