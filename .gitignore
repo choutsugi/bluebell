@@ -14,5 +14,11 @@
 # Dependency directories (remove the comment below to include it)
 # vendor/
 
+#排除Goland项目配置
 .idea
+
+#排除日志
 logs
+
+#排除本地数据
+deploy/bluebell/data
