@@ -13,13 +13,13 @@ log:
 
 data:
   datasource:
-    dsn: postgres://postgres:dangerous@127.0.0.1:5432/bluebell?sslmode=disable
+    dsn: postgres://bluebell:dangerous@127.0.0.1:5432/bluebell?sslmode=disable
   cache:
-    host: "127.0.0.1"
-    port: 6379
+    addr: "127.0.0.1:6379"
     password: "dangerous"
     db: 0
-    pool_size: 100
+    read_timeout: 1s
+    write_timeout: 1s
 
 snowflake:
   start_time: "2021-10-25"

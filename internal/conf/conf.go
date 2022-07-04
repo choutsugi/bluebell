@@ -5,6 +5,7 @@ import (
 	"github.com/fsnotify/fsnotify"
 	"github.com/spf13/viper"
 	"log"
+	"time"
 )
 
 type Bootstrap struct {
@@ -35,11 +36,11 @@ type Data struct {
 }
 
 type Cache struct {
-	Host     string `mapstructure:"host"`
-	Password string `mapstructure:"password"`
-	Port     int    `mapstructure:"port"`
-	Db       int    `mapstructure:"db"`
-	PoolSize int    `mapstructure:"pool_size"`
+	Addr         string        `mapstructure:"addr"`
+	Password     string        `mapstructure:"password"`
+	Db           int           `mapstructure:"db"`
+	ReadTimeout  time.Duration `mapstructure:"read_timeout"`
+	WriteTimeout time.Duration `mapstructure:"write_timeout"`
 }
 
 type DataSource struct {
