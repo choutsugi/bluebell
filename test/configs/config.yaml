@@ -1,0 +1,26 @@
+app:
+  name: "bluebell"
+  mode: "dev"
+  version: "v1.0.0"
+  port: 8080
+
+log:
+  level: "debug"
+  filename: "./logs/bluebell.log"
+  max_size: 200
+  max_age: 30
+  max_backups: 7
+
+data:
+  datasource:
+    dsn: postgres://bluebell:dangerous@127.0.0.1:5432/bluebell?sslmode=disable
+  cache:
+    addr: "127.0.0.1:6379"
+    password: "dangerous"
+    db: 0
+    read_timeout: 1s
+    write_timeout: 1s
+
+snowflake:
+  start_time: "2021-10-25"
+  machine_id: 1
