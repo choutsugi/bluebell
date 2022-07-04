@@ -1,7 +1,6 @@
 package conf
 
 import (
-	"flag"
 	"github.com/fsnotify/fsnotify"
 	"github.com/spf13/viper"
 	"log"
@@ -52,11 +51,9 @@ type SnowFlake struct {
 
 var Boot = new(Bootstrap)
 
-func Load() (err error) {
-	filePath := flag.String("conf", "configs/config.yaml", "config path, eg: -conf config.yaml")
+func Load(flagConf string) (err error) {
 
-	flag.Parse()
-	viper.SetConfigFile(*filePath)
+	viper.SetConfigFile(flagConf)
 
 	if err = viper.ReadInConfig(); err != nil {
 		return
