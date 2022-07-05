@@ -27,6 +27,7 @@ func Setup(api v1.Api) *gin.Engine {
 	{
 		certified.DELETE("logout", api.User.Logout)
 		certified.GET("communities", api.Community.FetchAll)
+		certified.GET("community/:id", api.Community.FetchOneById)
 	}
 
 	return r

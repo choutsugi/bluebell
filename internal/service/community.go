@@ -9,10 +9,15 @@ var _ CommunityService = (*communityService)(nil)
 
 type CommunityService interface {
 	FetchAll() (communities []*entity.Community, err error)
+	FetchOneById(cid int64) (community *entity.Community, err error)
 }
 
 type communityService struct {
 	repo repository.CommunityRepo
+}
+
+func (s *communityService) FetchOneById(cid int64) (community *entity.Community, err error) {
+	return s.repo.FetchOneById(cid)
 }
 
 func (s *communityService) FetchAll() (communities []*entity.Community, err error) {

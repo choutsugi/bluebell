@@ -12,6 +12,7 @@ const (
 	ErrPasswordInvalid       = "CODE_PASSWORD_INVALID"
 	ErrTokenInvalid          = "CODE_TOKEN_INVALID"
 	ErrTokenMissing          = "CODE_TOKEN_MISSING"
+	ErrCommunityNotFound     = "CODE_COMMUNITY_NOT_FOUND"
 )
 
 var maps = map[string]string{
@@ -24,6 +25,7 @@ var maps = map[string]string{
 	ErrPasswordInvalid:       "用户名或密码错误",
 	ErrTokenInvalid:          "Token无效",
 	ErrTokenMissing:          "Token缺失",
+	ErrCommunityNotFound:     "社区不存在",
 }
 
 func GetMsg(code string) string {
