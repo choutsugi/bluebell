@@ -26,7 +26,7 @@ func Setup(api v1.Api) *gin.Engine {
 	certified := group.Group("auth", middlerware.JwtAuth())
 	{
 		certified.DELETE("logout", api.User.Logout)
-		certified.GET("community", api.Community.FetchAll)
+		certified.GET("communities", api.Community.FetchAll)
 	}
 
 	return r
