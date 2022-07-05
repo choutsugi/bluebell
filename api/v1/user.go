@@ -27,6 +27,7 @@ func (api *userApi) Signup(ctx *gin.Context) {
 
 	if err := api.service.Signup(&req); err != nil {
 		result.Error(ctx, err)
+		return
 	}
 
 	result.Success(ctx, nil)
@@ -42,6 +43,7 @@ func (api *userApi) Login(ctx *gin.Context) {
 	resp, err := api.service.Login(&req)
 	if err != nil {
 		result.Error(ctx, err)
+		return
 	}
 
 	result.Success(ctx, resp)
