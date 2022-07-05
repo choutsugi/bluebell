@@ -30,5 +30,5 @@ jwt:
   ttl: 86400s
   blacklist_key_prefix: "JWT_BLACKLIST_"
   blacklist_grace_period: 10s
-  refresh_grace_period: 14400s
+  refresh_grace_period: 14400
   refresh_lock_name: "REFRESH_LOCKER"

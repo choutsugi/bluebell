@@ -7,10 +7,12 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v4"
 	"strconv"
+	"time"
 )
 
-func Auth() gin.HandlerFunc {
+func JwtAuth() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
+		//解析token
 		tokenStr := ctx.Request.Header.Get("Authorization")
 		if tokenStr == "" {
 			result.Error(ctx, errx.ErrTokenMissing)
@@ -18,7 +20,6 @@ func Auth() gin.HandlerFunc {
 			return
 		}
 		tokenStr = tokenStr[len(auth.Conf.TokenType)+1:]
-		// Token 解析校验
 		token, err := jwt.ParseWithClaims(tokenStr, &auth.Claims{}, func(token *jwt.Token) (interface{}, error) {
 			return []byte(auth.Conf.Secret), nil
 		})
@@ -35,6 +36,7 @@ func Auth() gin.HandlerFunc {
 			return
 		}
 
+		//校验发行人
 		claims := token.Claims.(*auth.Claims)
 		if claims.Issuer != auth.Conf.Issuer {
 			result.Error(ctx, errx.ErrTokenInvalid)
@@ -42,12 +44,27 @@ func Auth() gin.HandlerFunc {
 			return
 		}
 
-		uid, err := strconv.ParseInt(claims.ID, 10, 64)
-		if err != nil {
+		//黑名单过滤
+		if auth.IsInBlacklist(tokenStr) {
 			result.Error(ctx, errx.ErrTokenInvalid)
 			ctx.Abort()
 			return
 		}
-		ctx.Set("uid", uid)
+
+		//续签
+		if claims.ExpiresAt.Unix()-time.Now().Unix() < auth.Conf.RefreshGracePeriod {
+			//TODO：续签之前需要检查用户是否仍存在于数据库中
+			tokenData, err := auth.GenerateToken(claims.UID)
+			if err != nil {
+				result.Error(ctx, errx.ErrInternalServerError)
+				ctx.Abort()
+				return
+			}
+			ctx.Header("new_access_token", tokenData.AccessToken)
+			ctx.Header("new_expired_in", strconv.FormatInt(tokenData.ExpiresIn, 10))
+			ctx.Header("new_token_type", tokenData.TokenType)
+		}
+
+		ctx.Set("uid", claims.UID)
 	}
 }

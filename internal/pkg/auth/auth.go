@@ -3,7 +3,6 @@ package auth
 import (
 	"github.com/go-redis/redis"
 	"github.com/golang-jwt/jwt/v4"
-	"strconv"
 	"time"
 )
 
@@ -14,17 +13,18 @@ type Config struct {
 	TTL                  time.Duration
 	BlacklistKeyPrefix   string
 	BlacklistGracePeriod time.Duration
-	RefreshGracePeriod   time.Duration
+	RefreshGracePeriod   int64
 	RefreshLockName      string
 }
 
-type Result struct {
+type TokenData struct {
 	TokenType   string
 	AccessToken string
 	ExpiresIn   int64
 }
 
 type Claims struct {
+	UID int64
 	jwt.RegisteredClaims
 }
 
@@ -38,21 +38,41 @@ func Init(config Config, rdb *redis.Client) {
 	cache = rdb
 }
 
-func GenerateToken(uid int64) (ret Result, err error) {
+func GenerateToken(uid int64) (tokenData TokenData, err error) {
 
-	claim := Claims{
+	accessClaim := Claims{
+		uid,
 		jwt.RegisteredClaims{
 			Issuer:    Conf.Issuer,
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(Conf.TTL)),
 			NotBefore: jwt.NewNumericDate(time.Now()),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
-			ID:        strconv.FormatInt(uid, 10),
 		},
 	}
+	tokenData.AccessToken, err = jwt.NewWithClaims(jwt.SigningMethodHS256, accessClaim).
+		SignedString([]byte(Conf.Secret))
+	if err != nil {
+		return TokenData{}, err
+	}
+	tokenData.TokenType = Conf.TokenType
+	tokenData.ExpiresIn = int64(Conf.TTL / time.Second)
 
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claim)
-	ret.AccessToken, err = token.SignedString([]byte(Conf.Secret))
-	ret.TokenType = Conf.TokenType
-	ret.ExpiresIn = int64(Conf.TTL / time.Second)
 	return
+}
+
+func IsInBlacklist(token string) bool {
+	if _, err := cache.Get(getBlacklistKey(token)).Result(); err != nil {
+		return false
+	}
+	return true
+}
+
+func JoinBlacklist(token *jwt.Token) error {
+	curUnixTime := time.Now().Unix()
+	timer := time.Duration(token.Claims.(Claims).ExpiresAt.Unix()-curUnixTime) * time.Second
+	return cache.SetNX(getBlacklistKey(token.Raw), curUnixTime, timer).Err()
+}
+
+func getBlacklistKey(token string) string {
+	return Conf.BlacklistKeyPrefix + token
 }

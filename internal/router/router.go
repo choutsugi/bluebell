@@ -21,7 +21,7 @@ func Setup(api v1.Api) *gin.Engine {
 	r.POST("/api/v1/user/signup", api.User.Signup)
 	r.POST("/api/v1/user/login", api.User.Login)
 
-	admin := r.Group("auth", middlerware.Auth())
+	admin := r.Group("auth", middlerware.JwtAuth())
 	{
 		admin.GET("ping", func(ctx *gin.Context) {
 			ctx.JSON(http.StatusOK, gin.H{
