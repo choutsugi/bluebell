@@ -27,8 +27,8 @@ jwt:
   token_type: "bearer"
   issuer: "bluebell"
   secret: "нανє α ηι¢є ∂αу!"
-  ttl: 86400s
+  ttl: 86400
   blacklist_key_prefix: "JWT_BLACKLIST_"
-  blacklist_grace_period: 10s
+  blacklist_grace_period: 10
   refresh_grace_period: 14400
   refresh_lock_name: "REFRESH_LOCKER"

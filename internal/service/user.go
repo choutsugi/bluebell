@@ -8,6 +8,7 @@ import (
 	"bluebell/internal/schema"
 	"bluebell/pkg/encrypt"
 	"bluebell/pkg/snowflake"
+	"github.com/golang-jwt/jwt/v4"
 )
 
 var _ UserService = (*userService)(nil)
@@ -15,10 +16,15 @@ var _ UserService = (*userService)(nil)
 type UserService interface {
 	Signup(req *schema.UserSignupRequest) (err error)
 	Login(req *schema.UserLoginRequest) (resp *schema.UserLoginResponse, err error)
+	Logout(token *jwt.Token) (err error)
 }
 
 type userService struct {
 	repo repository.UserRepo
+}
+
+func (s *userService) Logout(token *jwt.Token) (err error) {
+	return auth.JoinBlacklist(token)
 }
 
 func (s *userService) Login(req *schema.UserLoginRequest) (resp *schema.UserLoginResponse, err error) {

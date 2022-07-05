@@ -20,7 +20,7 @@ func JwtAuth() gin.HandlerFunc {
 			return
 		}
 		tokenStr = tokenStr[len(auth.Conf.TokenType)+1:]
-		token, err := jwt.ParseWithClaims(tokenStr, &auth.Claims{}, func(token *jwt.Token) (interface{}, error) {
+		token, err := jwt.ParseWithClaims(tokenStr, &auth.CustomClaims{}, func(token *jwt.Token) (interface{}, error) {
 			return []byte(auth.Conf.Secret), nil
 		})
 		if err != nil {
@@ -37,7 +37,7 @@ func JwtAuth() gin.HandlerFunc {
 		}
 
 		//校验发行人
-		claims := token.Claims.(*auth.Claims)
+		claims := token.Claims.(*auth.CustomClaims)
 		if claims.Issuer != auth.Conf.Issuer {
 			result.Error(ctx, errx.ErrTokenInvalid)
 			ctx.Abort()
@@ -65,6 +65,7 @@ func JwtAuth() gin.HandlerFunc {
 			ctx.Header("new_token_type", tokenData.TokenType)
 		}
 
+		ctx.Set("token", token)
 		ctx.Set("uid", claims.UID)
 	}
 }

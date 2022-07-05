@@ -1,8 +1,10 @@
 package auth
 
 import (
+	"bluebell/internal/pkg/errx"
 	"github.com/go-redis/redis"
 	"github.com/golang-jwt/jwt/v4"
+	"strconv"
 	"time"
 )
 
@@ -10,9 +12,9 @@ type Config struct {
 	TokenType            string
 	Issuer               string
 	Secret               string
-	TTL                  time.Duration
+	TTL                  int64
 	BlacklistKeyPrefix   string
-	BlacklistGracePeriod time.Duration
+	BlacklistGracePeriod int64
 	RefreshGracePeriod   int64
 	RefreshLockName      string
 }
@@ -23,7 +25,7 @@ type TokenData struct {
 	ExpiresIn   int64
 }
 
-type Claims struct {
+type CustomClaims struct {
 	UID int64
 	jwt.RegisteredClaims
 }
@@ -40,11 +42,11 @@ func Init(config Config, rdb *redis.Client) {
 
 func GenerateToken(uid int64) (tokenData TokenData, err error) {
 
-	accessClaim := Claims{
-		uid,
-		jwt.RegisteredClaims{
+	accessClaim := CustomClaims{
+		UID: uid,
+		RegisteredClaims: jwt.RegisteredClaims{
 			Issuer:    Conf.Issuer,
-			ExpiresAt: jwt.NewNumericDate(time.Now().Add(Conf.TTL)),
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Duration(Conf.TTL) * time.Second)),
 			NotBefore: jwt.NewNumericDate(time.Now()),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
 		},
@@ -55,22 +57,35 @@ func GenerateToken(uid int64) (tokenData TokenData, err error) {
 		return TokenData{}, err
 	}
 	tokenData.TokenType = Conf.TokenType
-	tokenData.ExpiresIn = int64(Conf.TTL / time.Second)
-
+	tokenData.ExpiresIn = Conf.TTL
 	return
 }
 
 func IsInBlacklist(token string) bool {
-	if _, err := cache.Get(getBlacklistKey(token)).Result(); err != nil {
+	joinTimeStr, err := cache.Get(getBlacklistKey(token)).Result()
+	if err != nil {
 		return false
 	}
+	joinTime, err := strconv.ParseInt(joinTimeStr, 10, 64)
+	if err != nil {
+		return false
+	}
+
+	if time.Now().Unix()-joinTime < Conf.BlacklistGracePeriod {
+		return false
+	}
+
 	return true
 }
 
 func JoinBlacklist(token *jwt.Token) error {
-	curUnixTime := time.Now().Unix()
-	timer := time.Duration(token.Claims.(Claims).ExpiresAt.Unix()-curUnixTime) * time.Second
-	return cache.SetNX(getBlacklistKey(token.Raw), curUnixTime, timer).Err()
+	claim, ok := token.Claims.(*CustomClaims)
+	if !ok {
+		return errx.ErrTokenInvalid
+	}
+
+	timer := claim.ExpiresAt.Unix() - time.Now().Unix()
+	return cache.SetNX(getBlacklistKey(token.Raw), time.Now().Unix(), time.Duration(timer)*time.Second).Err()
 }
 
 func getBlacklistKey(token string) string {
