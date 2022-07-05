@@ -90,9 +90,10 @@ func NewServer(c *conf.Bootstrap) *Server {
 	auth.Init(jwtConfig, cache)
 
 	userRepo := repository.NewUserRepo(database.DB)
+	communityRepo := repository.NewCommunityRepo(database.DB)
 	userService := service.NewUserService(userRepo)
-
-	api := v1.Register(userService)
+	communityService := service.NewCommunityService(communityRepo)
+	api := v1.Register(userService, communityService)
 
 	srv := &Server{
 		addr:    c.App.Addr,

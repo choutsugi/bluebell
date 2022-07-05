@@ -11,22 +11,22 @@ func Setup(api v1.Api) *gin.Engine {
 	r := gin.New()
 
 	r.Use(middlerware.Logger(), middlerware.Recovery(true))
-
 	r.NoRoute(func(ctx *gin.Context) {
-		ctx.JSON(http.StatusOK, gin.H{
-			"msg": "Page Not Found",
+		ctx.JSON(http.StatusNotFound, gin.H{
+			"message": "404",
 		})
 	})
 
-	r.POST("/api/v1/user/signup", api.User.Signup)
-	r.POST("/api/v1/user/login", api.User.Login)
-
-	admin := r.Group("/api/v1/auth/", middlerware.JwtAuth())
+	group := r.Group("/api/v1")
 	{
-		admin.DELETE("logout", api.User.Logout)
-		admin.GET("ping", func(ctx *gin.Context) {
-			ctx.JSON(http.StatusOK, gin.H{"message": "pong"})
-		})
+		group.POST("signup", api.User.Signup)
+		group.POST("login", api.User.Login)
+	}
+
+	certified := group.Group("auth", middlerware.JwtAuth())
+	{
+		certified.DELETE("logout", api.User.Logout)
+		certified.GET("community", api.Community.FetchAll)
 	}
 
 	return r

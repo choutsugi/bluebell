@@ -30,7 +30,7 @@ func NewDataSource(c *conf.DataSource) *gorm.DB {
 		log.Panicf("failed to establish connection with database: %v", err)
 	}
 
-	if err = db.AutoMigrate(&entity.User{}); err != nil {
+	if err = db.AutoMigrate(&entity.User{}, &entity.Community{}); err != nil {
 		log.Panicf("failed to migrate table to database: %v", err)
 	}
 	return db
