@@ -1,7 +1,7 @@
 package router
 
 import (
-	v1 "bluebell/api/v1"
+	"bluebell/api/v1"
 	"bluebell/internal/middlerware"
 	"github.com/gin-gonic/gin"
 	"net/http"
