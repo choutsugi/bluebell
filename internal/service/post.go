@@ -14,10 +14,21 @@ type PostService interface {
 	Update(req *schema.PostUpdateRequest) (err error)
 	FetchByID(postId int64) (post *entity.Post, err error)
 	FetchAll() (posts []*entity.Post, err error)
+	FetchList(req *schema.PostFetchListRequest) (posts []*entity.Post, err error)
 }
 
 type postService struct {
 	repo repository.PostRepo
+}
+
+func (s *postService) FetchList(req *schema.PostFetchListRequest) (posts []*entity.Post, err error) {
+	if req.PageNum <= 0 {
+		req.PageNum = 1
+	}
+	offset := (req.PageNum - 1) * req.PageSize
+	limit := req.PageSize
+
+	return s.repo.FetchList(offset, limit)
 }
 
 func (s *postService) Create(req *schema.PostCreateRequest) (err error) {

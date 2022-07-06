@@ -14,10 +14,24 @@ type PostRepo interface {
 	Update(post *entity.Post) (err error)
 	FetchByID(postId int64) (post *entity.Post, err error)
 	FetchAll() (posts []*entity.Post, err error)
+	FetchList(offset, limit int) (posts []*entity.Post, err error)
 }
 
 type postRepo struct {
 	db *gorm.DB
+}
+
+func (repo *postRepo) FetchList(offset, limit int) (posts []*entity.Post, err error) {
+	posts = make([]*entity.Post, 0)
+
+	//后端计算分页时：
+	if err = repo.db.Offset(offset).Limit(limit).Find(posts).Error; err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return nil, errx.ErrPostNotFound
+		}
+		return nil, err
+	}
+	return
 }
 
 func (repo *postRepo) Insert(post *entity.Post) (err error) {

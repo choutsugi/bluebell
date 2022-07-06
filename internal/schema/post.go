@@ -12,3 +12,8 @@ type PostUpdateRequest struct {
 	Title   string `json:"title" binding:"required,gte=6,lte=128"`
 	Content string `json:"content" binding:"required,gte=6"`
 }
+
+type PostFetchListRequest struct {
+	PageNum  int `form:"page_num"`
+	PageSize int `form:"page_size"`
+}

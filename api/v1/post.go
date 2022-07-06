@@ -17,10 +17,27 @@ type PostApi interface {
 	Update(ctx *gin.Context)
 	FetchById(ctx *gin.Context)
 	FetchAll(ctx *gin.Context)
+	FetchList(ctx *gin.Context)
 }
 
 type postApi struct {
 	service service.PostService
+}
+
+func (api *postApi) FetchList(ctx *gin.Context) {
+	req := new(schema.PostFetchListRequest)
+	if err := ctx.ShouldBindQuery(req); err != nil {
+		result.Error(ctx, err)
+		return
+	}
+
+	posts, err := api.service.FetchList(req)
+	if err != nil {
+		result.Error(ctx, err)
+		return
+	}
+
+	result.Success(ctx, posts)
 }
 
 func (api *postApi) Create(ctx *gin.Context) {

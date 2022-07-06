@@ -22,10 +22,11 @@ func Setup(api v1.Api) *gin.Engine {
 		group.POST("signup", api.User.Signup)
 		group.POST("login", api.User.Login)
 
-		group.GET("community/list", api.Community.FetchAll)
+		group.GET("community/all", api.Community.FetchAll)
 		group.GET("community/:id", api.Community.FetchOneById)
-		group.POST("post/list", api.Post.FetchAll)
-		group.POST("post/:id", api.Post.FetchById)
+		group.GET("post/all", api.Post.FetchAll)
+		group.GET("post/list", api.Post.FetchList)
+		group.GET("post/:id", api.Post.FetchById)
 	}
 
 	certified := group.Group("auth", middlerware.JwtAuth())
