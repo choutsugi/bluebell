@@ -31,13 +31,13 @@ type CustomClaims struct {
 }
 
 var (
-	Conf  Config
-	cache *redis.Client
+	Conf Config
+	rdb  *redis.Client
 )
 
-func Init(config Config, rdb *redis.Client) {
+func Init(config Config, client *redis.Client) {
 	Conf = config
-	cache = rdb
+	rdb = client
 }
 
 func GenerateToken(uid int64) (tokenData TokenData, err error) {
@@ -62,7 +62,7 @@ func GenerateToken(uid int64) (tokenData TokenData, err error) {
 }
 
 func IsInBlacklist(token string) bool {
-	joinTimeStr, err := cache.Get(getBlacklistKey(token)).Result()
+	joinTimeStr, err := rdb.Get(getBlacklistKey(token)).Result()
 	if err != nil {
 		return false
 	}
@@ -85,7 +85,7 @@ func JoinBlacklist(token *jwt.Token) error {
 	}
 
 	timer := claim.ExpiresAt.Unix() - time.Now().Unix()
-	return cache.SetNX(getBlacklistKey(token.Raw), time.Now().Unix(), time.Duration(timer)*time.Second).Err()
+	return rdb.SetNX(getBlacklistKey(token.Raw), time.Now().Unix(), time.Duration(timer)*time.Second).Err()
 }
 
 func getBlacklistKey(token string) string {
