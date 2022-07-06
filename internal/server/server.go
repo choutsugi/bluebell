@@ -2,6 +2,7 @@ package server
 
 import (
 	v1 "bluebell/api/v1"
+	"bluebell/internal/cache"
 	"bluebell/internal/conf"
 	"bluebell/internal/data"
 	"bluebell/internal/pkg/auth"
@@ -72,9 +73,9 @@ func NewServer(c *conf.Bootstrap) *Server {
 	}
 
 	//建立数据库连接
-	dataSource := data.NewDataSource(c.Data.DataSource)
-	cache := data.NewCache(c.Data.Cache)
-	database := data.NewData(dataSource, cache)
+	db := data.NewDataSource(c.Data.DataSource)
+	rdb := data.NewCache(c.Data.Cache)
+	database := data.NewData(db, rdb)
 
 	//初始化jwt
 	jwtConfig := auth.Config{
@@ -87,15 +88,17 @@ func NewServer(c *conf.Bootstrap) *Server {
 		RefreshGracePeriod:   c.Jwt.RefreshGracePeriod,
 		RefreshLockName:      c.Jwt.RefreshLockName,
 	}
-	auth.Init(jwtConfig, cache)
+	auth.Init(jwtConfig, rdb)
 
 	userRepo := repository.NewUserRepo(database.DB)
 	communityRepo := repository.NewCommunityRepo(database.DB)
 	postRepo := repository.NewPostRepo(database.DB)
+	voteCache := cache.NewVoteCache(rdb)
 	userService := service.NewUserService(userRepo)
 	communityService := service.NewCommunityService(communityRepo)
-	postService := service.NewPostService(postRepo)
-	api := v1.Register(userService, communityService, postService)
+	postService := service.NewPostService(postRepo, voteCache, c.Ranking)
+	voteService := service.NewVoteService(voteCache, c.Ranking)
+	api := v1.Register(userService, communityService, postService, voteService)
 
 	srv := &Server{
 		addr:    c.App.Addr,

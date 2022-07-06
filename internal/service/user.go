@@ -7,7 +7,6 @@ import (
 	"bluebell/internal/repository"
 	"bluebell/internal/schema"
 	"bluebell/pkg/encrypt"
-	"bluebell/pkg/snowflake"
 	"github.com/golang-jwt/jwt/v4"
 )
 
@@ -61,7 +60,6 @@ func (s *userService) Signup(req *schema.UserSignupRequest) (err error) {
 	}
 
 	user := entity.User{
-		Uid:      snowflake.GenerateID(),
 		Username: req.Username,
 		Email:    req.Email,
 	}

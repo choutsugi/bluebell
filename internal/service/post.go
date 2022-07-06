@@ -1,9 +1,13 @@
 package service
 
 import (
+	"bluebell/internal/cache"
+	"bluebell/internal/conf"
 	"bluebell/internal/entity"
 	"bluebell/internal/repository"
 	"bluebell/internal/schema"
+	"bluebell/pkg/snowflake"
+	"strconv"
 )
 
 var _ PostService = (*postService)(nil)
@@ -18,7 +22,9 @@ type PostService interface {
 }
 
 type postService struct {
-	repo repository.PostRepo
+	repo  repository.PostRepo
+	cache cache.VoteCache
+	conf  *conf.Ranking
 }
 
 func (s *postService) FetchList(req *schema.PostFetchListRequest) (posts []*entity.Post, err error) {
@@ -34,12 +40,21 @@ func (s *postService) FetchList(req *schema.PostFetchListRequest) (posts []*enti
 func (s *postService) Create(req *schema.PostCreateRequest) (err error) {
 
 	post := entity.Post{
+		ID:          snowflake.GenerateID(),
 		Title:       req.Title,
 		Content:     req.Content,
 		AuthorId:    req.AuthorId,
 		CommunityId: req.CommunityId,
 	}
-	return s.repo.Insert(&post)
+	if err = s.repo.Insert(&post); err != nil {
+		return err
+	}
+
+	if err = s.cache.JoinRanking(s.conf.PostTimeKey, strconv.FormatInt(post.ID, 10)); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (s *postService) Delete(postId int64) (err error) {
@@ -66,6 +81,6 @@ func (s *postService) FetchAll() (posts []*entity.Post, err error) {
 	return s.repo.FetchAll()
 }
 
-func NewPostService(repo repository.PostRepo) PostService {
-	return &postService{repo: repo}
+func NewPostService(repo repository.PostRepo, cache cache.VoteCache, conf *conf.Ranking) PostService {
+	return &postService{repo: repo, cache: cache, conf: conf}
 }

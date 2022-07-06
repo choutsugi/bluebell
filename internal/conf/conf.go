@@ -13,6 +13,7 @@ type Bootstrap struct {
 	Data      *Data      `mapstructure:"data"`
 	SnowFlake *SnowFlake `mapstructure:"snowflake"`
 	Jwt       *Jwt       `mapstructure:"jwt"`
+	Ranking   *Ranking   `mapstructure:"ranking"`
 }
 
 type App struct {
@@ -59,6 +60,14 @@ type Jwt struct {
 	BlacklistGracePeriod int64  `mapstructure:"blacklist_grace_period"` // 黑名单宽限时间（避免并发请求失败）
 	RefreshGracePeriod   int64  `mapstructure:"refresh_grace_period"`
 	RefreshLockName      string `mapstructure:"refresh_lock_name"`
+}
+
+type Ranking struct {
+	PostTimeKey       string  `mapstructure:"post_time_key"`
+	PostScoreKey      string  `mapstructure:"post_score_key"`
+	PostVotedPrefix   string  `mapstructure:"post_voted_prefix"`
+	PostVotingPeriod  int64   `mapstructure:"post_voting_period"`
+	PostVoteUnitScore float64 `mapstructure:"post_vote_unit_score"`
 }
 
 var Boot = new(Bootstrap)

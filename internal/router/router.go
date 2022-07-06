@@ -21,20 +21,23 @@ func Setup(api v1.Api) *gin.Engine {
 	{
 		group.POST("signup", api.User.Signup)
 		group.POST("login", api.User.Login)
-
-		group.GET("community/all", api.Community.FetchAll)
-		group.GET("community/:id", api.Community.FetchOneById)
-		group.GET("post/all", api.Post.FetchAll)
-		group.GET("post/list", api.Post.FetchList)
-		group.GET("post/:id", api.Post.FetchById)
 	}
 
 	certified := group.Group("auth", middlerware.JwtAuth())
 	{
 		certified.DELETE("logout", api.User.Logout)
+
+		certified.GET("community/all", api.Community.FetchAll)
+		certified.GET("community/:id", api.Community.FetchOneById)
+
+		certified.GET("post/all", api.Post.FetchAll)
+		certified.GET("post/list", api.Post.FetchList)
+		certified.GET("post/:id", api.Post.FetchById)
 		certified.POST("post", api.Post.Create)
 		certified.PUT("post", api.Post.Update)
 		certified.DELETE("post/:id", api.Post.Delete)
+
+		certified.POST("vote", api.Vote.PostVote)
 	}
 
 	return r

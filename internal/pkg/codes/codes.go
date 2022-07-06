@@ -15,6 +15,7 @@ const (
 	ErrCommunityNotFound     = "CODE_COMMUNITY_NOT_FOUND"
 	ErrPostNotFound          = "CODE_POST_NOT_FOUND"
 	ErrUserNotCertified      = "CODE_USER_NOT_CERTIFIED"
+	ErrBeyondVotingPeriod    = "CODE_BEYOND_VOTING_PERIOD"
 )
 
 var maps = map[string]string{
@@ -30,6 +31,7 @@ var maps = map[string]string{
 	ErrCommunityNotFound:     "社区不存在",
 	ErrPostNotFound:          "帖子不存在",
 	ErrUserNotCertified:      "用户未登录",
+	ErrBeyondVotingPeriod:    "超出投票时段",
 }
 
 func GetMsg(code string) string {

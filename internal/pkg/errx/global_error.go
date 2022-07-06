@@ -14,4 +14,5 @@ var (
 	ErrCommunityNotFound     = New(codes.ErrCommunityNotFound)
 	ErrPostNotFound          = New(codes.ErrPostNotFound)
 	ErrUserNotCertified      = New(codes.ErrUserNotCertified)
+	ErrBeyondVotingPeriod    = New(codes.ErrBeyondVotingPeriod)
 )
