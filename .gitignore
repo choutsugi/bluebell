@@ -21,4 +21,4 @@
 logs
 
 #排除本地数据
-deploy/bluebell/data
+deploy/bluebell/**/data
