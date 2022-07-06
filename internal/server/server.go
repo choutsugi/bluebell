@@ -91,9 +91,11 @@ func NewServer(c *conf.Bootstrap) *Server {
 
 	userRepo := repository.NewUserRepo(database.DB)
 	communityRepo := repository.NewCommunityRepo(database.DB)
+	postRepo := repository.NewPostRepo(database.DB)
 	userService := service.NewUserService(userRepo)
 	communityService := service.NewCommunityService(communityRepo)
-	api := v1.Register(userService, communityService)
+	postService := service.NewPostService(postRepo)
+	api := v1.Register(userService, communityService, postService)
 
 	srv := &Server{
 		addr:    c.App.Addr,

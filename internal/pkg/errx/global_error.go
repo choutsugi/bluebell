@@ -12,4 +12,6 @@ var (
 	ErrTokenMissing          = New(codes.ErrTokenMissing)
 	ErrTokenInvalid          = New(codes.ErrTokenInvalid)
 	ErrCommunityNotFound     = New(codes.ErrCommunityNotFound)
+	ErrPostNotFound          = New(codes.ErrPostNotFound)
+	ErrUserNotCertified      = New(codes.ErrUserNotCertified)
 )
