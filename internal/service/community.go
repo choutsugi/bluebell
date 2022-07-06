@@ -1,8 +1,8 @@
 package service
 
 import (
+	"bluebell/internal/data/repo"
 	"bluebell/internal/entity"
-	"bluebell/internal/repository"
 )
 
 var _ CommunityService = (*communityService)(nil)
@@ -13,7 +13,7 @@ type CommunityService interface {
 }
 
 type communityService struct {
-	repo repository.CommunityRepo
+	repo repo.CommunityRepo
 }
 
 func (s *communityService) FetchOneById(cid int64) (community *entity.Community, err error) {
@@ -24,6 +24,6 @@ func (s *communityService) FetchAll() (communities []*entity.Community, err erro
 	return s.repo.FetchAll()
 }
 
-func NewCommunityService(repo repository.CommunityRepo) CommunityService {
+func NewCommunityService(repo repo.CommunityRepo) CommunityService {
 	return &communityService{repo: repo}
 }

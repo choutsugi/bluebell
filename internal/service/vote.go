@@ -1,8 +1,8 @@
 package service
 
 import (
-	"bluebell/internal/cache"
 	"bluebell/internal/conf"
+	"bluebell/internal/data/cache"
 	"bluebell/internal/pkg/errx"
 	"bluebell/internal/schema"
 	"math"

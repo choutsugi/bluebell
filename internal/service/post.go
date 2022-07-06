@@ -1,10 +1,10 @@
 package service
 
 import (
-	"bluebell/internal/cache"
 	"bluebell/internal/conf"
+	"bluebell/internal/data/cache"
+	"bluebell/internal/data/repo"
 	"bluebell/internal/entity"
-	"bluebell/internal/repository"
 	"bluebell/internal/schema"
 	"bluebell/pkg/snowflake"
 	"strconv"
@@ -22,7 +22,7 @@ type PostService interface {
 }
 
 type postService struct {
-	repo  repository.PostRepo
+	repo  repo.PostRepo
 	cache cache.VoteCache
 	conf  *conf.Ranking
 }
@@ -81,6 +81,6 @@ func (s *postService) FetchAll() (posts []*entity.Post, err error) {
 	return s.repo.FetchAll()
 }
 
-func NewPostService(repo repository.PostRepo, cache cache.VoteCache, conf *conf.Ranking) PostService {
+func NewPostService(repo repo.PostRepo, cache cache.VoteCache, conf *conf.Ranking) PostService {
 	return &postService{repo: repo, cache: cache, conf: conf}
 }

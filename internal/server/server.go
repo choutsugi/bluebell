@@ -2,11 +2,11 @@ package server
 
 import (
 	v1 "bluebell/api/v1"
-	"bluebell/internal/cache"
 	"bluebell/internal/conf"
 	"bluebell/internal/data"
+	"bluebell/internal/data/cache"
+	"bluebell/internal/data/repo"
 	"bluebell/internal/pkg/auth"
-	"bluebell/internal/repository"
 	"bluebell/internal/router"
 	"bluebell/internal/service"
 	"bluebell/pkg/logger"
@@ -90,14 +90,21 @@ func NewServer(c *conf.Bootstrap) *Server {
 	}
 	auth.Init(jwtConfig, rdb)
 
-	userRepo := repository.NewUserRepo(database.DB)
-	communityRepo := repository.NewCommunityRepo(database.DB)
-	postRepo := repository.NewPostRepo(database.DB)
+	//Repo
+	userRepo := repo.NewUserRepo(database.DB)
+	communityRepo := repo.NewCommunityRepo(database.DB)
+	postRepo := repo.NewPostRepo(database.DB)
+
+	//Cache
 	voteCache := cache.NewVoteCache(rdb)
+
+	//Service
 	userService := service.NewUserService(userRepo)
 	communityService := service.NewCommunityService(communityRepo)
 	postService := service.NewPostService(postRepo, voteCache, c.Ranking)
 	voteService := service.NewVoteService(voteCache, c.Ranking)
+
+	//Register Services
 	api := v1.Register(userService, communityService, postService, voteService)
 
 	srv := &Server{

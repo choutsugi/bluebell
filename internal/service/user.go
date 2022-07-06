@@ -1,10 +1,10 @@
 package service
 
 import (
+	"bluebell/internal/data/repo"
 	"bluebell/internal/entity"
 	"bluebell/internal/pkg/auth"
 	"bluebell/internal/pkg/errx"
-	"bluebell/internal/repository"
 	"bluebell/internal/schema"
 	"bluebell/pkg/encrypt"
 	"github.com/golang-jwt/jwt/v4"
@@ -19,7 +19,7 @@ type UserService interface {
 }
 
 type userService struct {
-	repo repository.UserRepo
+	repo repo.UserRepo
 }
 
 func (s *userService) Logout(token *jwt.Token) (err error) {
@@ -71,6 +71,6 @@ func (s *userService) Signup(req *schema.UserSignupRequest) (err error) {
 	return s.repo.InsertUser(&user)
 }
 
-func NewUserService(repo repository.UserRepo) UserService {
+func NewUserService(repo repo.UserRepo) UserService {
 	return &userService{repo: repo}
 }
