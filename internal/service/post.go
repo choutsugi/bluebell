@@ -50,11 +50,7 @@ func (s *postService) Create(req *schema.PostCreateRequest) (err error) {
 		return err
 	}
 
-	if err = s.cache.JoinRanking(s.conf.PostTimeKey, strconv.FormatInt(post.ID, 10)); err != nil {
-		return err
-	}
-
-	return nil
+	return s.cache.InsertPost(s.conf.PostTimeKey, s.conf.PostScoreKey, strconv.FormatInt(post.ID, 10))
 }
 
 func (s *postService) Delete(postId int64) (err error) {

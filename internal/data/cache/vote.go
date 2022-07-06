@@ -1,57 +1,90 @@
 package cache
 
 import (
+	"bluebell/internal/pkg/errx"
 	"github.com/go-redis/redis"
+	"math"
 	"time"
 )
 
 var _ VoteCache = (*voteCache)(nil)
 
 type VoteCache interface {
-	JoinRanking(postTimeKey, postId string) (err error)
-	GetPostTime(postTimeKey, postId string) (postTime float64, err error)
-	GetVoteRecord(postVotedKey, uid string) (opinion float64, err error)
-	UpdateRankingScore(postScoreKey, postId string, score float64) (err error)
-	DeleteVoteRecord(postVotedKey, uid string) (err error)
-	InsertVoteRecord(postVotedKey, uid string, opinion float64) (err error)
+	InsertPost(postTimeKey, postScoreKey, postId string) (err error)
+	VotePost(timeKey, scoreKey, votedKey, postId, uid string, period, unitScore, opinion float64) (err error)
 }
 
 type voteCache struct {
 	rdb *redis.Client
 }
 
-func (cache *voteCache) InsertVoteRecord(postVotedKey, uid string, opinion float64) (err error) {
-	_, err = cache.rdb.ZAdd(postVotedKey, redis.Z{
-		Score:  opinion,
-		Member: uid,
-	}).Result()
-	return
+func (cache *voteCache) VotePost(timeKey, scoreKey, votedKey, postId, uid string, period, unitScore, opinion float64) (err error) {
+	//获取帖子发布时间
+	postTime, err := cache.rdb.ZScore(timeKey, postId).Result()
+	if err != nil {
+		return errx.ErrBeyondVotingPeriod
+	}
+
+	//帖子发布后一周内允许投票
+	if float64(time.Now().Unix())-postTime > period {
+		return errx.ErrBeyondVotingPeriod
+	}
+
+	//查询用户投票记录
+	originOpinion, err := cache.rdb.ZScore(votedKey, uid).Result()
+	if err != nil {
+		return err
+	}
+
+	//计算分数
+	var orientation float64
+	if opinion > originOpinion {
+		orientation = 1
+	} else {
+		orientation = -1
+	}
+	diff := math.Abs(opinion - originOpinion)
+	score := orientation * diff * unitScore
+
+	//开始事务
+	pipeline := cache.rdb.TxPipeline()
+
+	//更新投票排行榜分数
+	pipeline.ZIncrBy(scoreKey, score, postId)
+
+	if opinion == 0 {
+		//删除用户投票信息
+		pipeline.ZRem(votedKey, uid)
+	} else {
+		//记录用户投票信息
+		pipeline.ZAdd(votedKey, redis.Z{
+			Score:  opinion,
+			Member: uid,
+		})
+	}
+
+	_, err = pipeline.Exec()
+
+	return err
 }
 
-func (cache *voteCache) DeleteVoteRecord(postVotedKey, uid string) (err error) {
-	_, err = cache.rdb.ZRem(postVotedKey, uid).Result()
-	return
-}
+func (cache *voteCache) InsertPost(postTimeKey, postScoreKey, postId string) (err error) {
 
-func (cache *voteCache) UpdateRankingScore(postScoreKey, postId string, score float64) (err error) {
-	_, err = cache.rdb.ZIncrBy(postScoreKey, score, postId).Result()
-	return
-}
+	//开启事务
+	pipeline := cache.rdb.TxPipeline()
 
-func (cache *voteCache) GetVoteRecord(postVotedKey, uid string) (opinion float64, err error) {
-	return cache.rdb.ZScore(postVotedKey, uid).Result()
-}
-
-func (cache *voteCache) GetPostTime(postTimeKey, postId string) (postTime float64, err error) {
-	return cache.rdb.ZScore(postTimeKey, postId).Result()
-}
-
-func (cache *voteCache) JoinRanking(postTimeKey, postId string) (err error) {
-	_, err = cache.rdb.ZAdd(postTimeKey, redis.Z{
+	pipeline.ZAdd(postTimeKey, redis.Z{
 		Score:  float64(time.Now().Unix()),
 		Member: postId,
-	}).Result()
-	return
+	})
+
+	pipeline.ZAdd(postScoreKey, redis.Z{
+		Score:  float64(time.Now().Unix()),
+		Member: postId,
+	})
+
+	_, err = pipeline.Exec()
+	return err
 }
 
 func NewVoteCache(rdb *redis.Client) VoteCache {
