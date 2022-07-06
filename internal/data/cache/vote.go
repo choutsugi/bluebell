@@ -32,7 +32,7 @@ func (cache *voteCache) VotePost(timeKey, scoreKey, votedKey, postId, uid string
 
 	//查询用户投票记录
 	originOpinion, err := cache.rdb.ZScore(votedKey, uid).Result()
-	if err != nil {
+	if err != nil && err != redis.Nil {
 		return err
 	}
 
