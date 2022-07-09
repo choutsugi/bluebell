@@ -1,7 +1,7 @@
 version: '3'
 services:
   postgres:
-    image: postgres:latest
+    image: 'postgres:latest'
     container_name: postgres
     restart: always
     networks:
@@ -14,21 +14,23 @@ services:
       - "5432:5432"
     volumes:
       - ./postgres/data:/var/lib/postgresql/data
+
   redis:
-    image: redis:latest
+    image: 'redis:latest'
     container_name: redis
+    restart: always
     command: redis-server /usr/local/etc/redis/redis.conf
     #command: redis-server --save 60 1 --requirepass dangerous --loglevel warning
-    restart: always
     networks:
       - compose-network
     ports:
-      - "6379:6379"
+      - '6379:6379'
     volumes:
       - ./redis/data:/data
       - ./redis/conf/redis.conf:/usr/local/etc/redis/redis.conf
+
   redisinsight:
-    image: redislabs/redisinsight:latest
+    image: 'redislabs/redisinsight:latest'
     container_name: redisinsight
     restart: always
     networks:
