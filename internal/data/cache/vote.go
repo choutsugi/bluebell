@@ -15,11 +15,33 @@ type VoteCache interface {
 	Insert(id string) (err error)
 	Vote(id, uid string, opinion float64) (err error)
 	FetchIDs(start, end int64, orderBy string) ([]string, error)
+	CountLikes(ids []string) (data []int64, err error)
 }
 
 type voteCache struct {
 	rdb  *redis.Client
 	conf *conf.Ranking
+}
+
+func (cache *voteCache) CountLikes(ids []string) (data []int64, err error) {
+
+	pipeline := cache.rdb.Pipeline()
+
+	for _, id := range ids {
+		pipeline.ZCount(cache.conf.PostVotedPrefix+id, "1", "1")
+	}
+	cmders, err := pipeline.Exec()
+	if err != nil {
+		return nil, err
+	}
+
+	data = make([]int64, 0, len(cmders))
+	for _, cmder := range cmders {
+		val := cmder.(*redis.IntCmd).Val()
+		data = append(data, val)
+	}
+
+	return
 }
 
 func (cache *voteCache) FetchIDs(start, end int64, orderBy string) ([]string, error) {
