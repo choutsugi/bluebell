@@ -31,7 +31,8 @@ func Setup(api v1.Api) *gin.Engine {
 		certified.GET("community/:id", api.Community.FetchOneById)
 
 		certified.GET("post/all", api.Post.FetchAll)
-		certified.GET("post/list", api.Post.FetchList)
+		certified.GET("post/list/order", api.Post.FetchListByOrder)
+		certified.GET("post/list/paginate", api.Post.FetchListByPaginate)
 		certified.GET("post/:id", api.Post.FetchById)
 		certified.POST("post", api.Post.Create)
 		certified.PUT("post", api.Post.Update)

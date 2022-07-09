@@ -13,7 +13,13 @@ type PostUpdateRequest struct {
 	Content string `json:"content" binding:"required,gte=6"`
 }
 
-type PostFetchListRequest struct {
+type PostFetchPaginateRequest struct {
 	PageNum  int `form:"page_num"`
 	PageSize int `form:"page_size"`
+}
+
+type PostFetchOrderRequest struct {
+	OrderBy  string `form:"order_by"`
+	PageNum  int    `form:"page_num"`
+	PageSize int    `form:"page_size"`
 }

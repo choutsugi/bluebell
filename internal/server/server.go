@@ -96,7 +96,7 @@ func NewServer(c *conf.Bootstrap) *Server {
 	postRepo := repo.NewPostRepo(database.DB)
 
 	//Cache
-	voteCache := cache.NewVoteCache(rdb)
+	voteCache := cache.NewVoteCache(rdb, c.Ranking)
 
 	//Service
 	userService := service.NewUserService(userRepo)

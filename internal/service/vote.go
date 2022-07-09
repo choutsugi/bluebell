@@ -26,7 +26,7 @@ func (s *voteService) Vote(uid int64, req *schema.VotePostRequest) (err error) {
 	period := float64(s.conf.PostVotingPeriod)
 	votedKey := s.conf.PostVotedPrefix + strconv.FormatInt(req.PostID, 10)
 
-	return s.cache.VotePost(s.conf.PostTimeKey, s.conf.PostScoreKey, votedKey, postIdStr, uidStr, period, s.conf.PostVoteUnitScore, opinion)
+	return s.cache.Vote(s.conf.PostTimeKey, s.conf.PostScoreKey, votedKey, postIdStr, uidStr, period, s.conf.PostVoteUnitScore, opinion)
 }
 
 func NewVoteService(cache cache.VoteCache, conf *conf.Ranking) VoteService {

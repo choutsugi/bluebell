@@ -1,6 +1,8 @@
 package cache
 
 import (
+	"bluebell/internal/conf"
+	"bluebell/internal/consts"
 	"bluebell/internal/pkg/errx"
 	"github.com/go-redis/redis"
 	"math"
@@ -10,15 +12,32 @@ import (
 var _ VoteCache = (*voteCache)(nil)
 
 type VoteCache interface {
-	InsertPost(postTimeKey, postScoreKey, postId string) (err error)
-	VotePost(timeKey, scoreKey, votedKey, postId, uid string, period, unitScore, opinion float64) (err error)
+	Insert(postTimeKey, postScoreKey, postId string) (err error)
+	Vote(timeKey, scoreKey, votedKey, postId, uid string, period, unitScore, opinion float64) (err error)
+	FetchIDs(start, end int64, orderBy string) ([]string, error)
 }
 
 type voteCache struct {
-	rdb *redis.Client
+	rdb  *redis.Client
+	conf *conf.Ranking
 }
 
-func (cache *voteCache) VotePost(timeKey, scoreKey, votedKey, postId, uid string, period, unitScore, opinion float64) (err error) {
+func (cache *voteCache) FetchIDs(start, end int64, orderBy string) ([]string, error) {
+
+	var key string
+	switch orderBy {
+	case consts.PostOrderByScore:
+		key = cache.conf.PostScoreKey
+	case consts.PostOrderByTime:
+		key = cache.conf.PostTimeKey
+	default:
+		key = cache.conf.PostTimeKey
+	}
+	//倒序
+	return cache.rdb.ZRevRange(key, start, end).Result()
+}
+
+func (cache *voteCache) Vote(timeKey, scoreKey, votedKey, postId, uid string, period, unitScore, opinion float64) (err error) {
 	//获取帖子发布时间
 	postTime, err := cache.rdb.ZScore(timeKey, postId).Result()
 	if err != nil {
@@ -68,7 +87,7 @@ func (cache *voteCache) VotePost(timeKey, scoreKey, votedKey, postId, uid string
 	return err
 }
 
-func (cache *voteCache) InsertPost(postTimeKey, postScoreKey, postId string) (err error) {
+func (cache *voteCache) Insert(postTimeKey, postScoreKey, postId string) (err error) {
 
 	//开启事务
 	pipeline := cache.rdb.TxPipeline()
@@ -87,6 +106,6 @@ func (cache *voteCache) InsertPost(postTimeKey, postScoreKey, postId string) (er
 	return err
 }
 
-func NewVoteCache(rdb *redis.Client) VoteCache {
-	return &voteCache{rdb: rdb}
+func NewVoteCache(rdb *redis.Client, conf *conf.Ranking) VoteCache {
+	return &voteCache{rdb: rdb, conf: conf}
 }

@@ -17,21 +17,39 @@ type PostApi interface {
 	Update(ctx *gin.Context)
 	FetchById(ctx *gin.Context)
 	FetchAll(ctx *gin.Context)
-	FetchList(ctx *gin.Context)
+	FetchListByOrder(ctx *gin.Context)
+	FetchListByPaginate(ctx *gin.Context)
 }
 
 type postApi struct {
 	service service.PostService
 }
 
-func (api *postApi) FetchList(ctx *gin.Context) {
-	req := new(schema.PostFetchListRequest)
+func (api *postApi) FetchListByPaginate(ctx *gin.Context) {
+	req := &schema.PostFetchPaginateRequest{}
 	if err := ctx.ShouldBindQuery(req); err != nil {
 		result.Error(ctx, err)
 		return
 	}
 
-	posts, err := api.service.FetchList(req)
+	posts, err := api.service.FetchListByPaginate(req)
+	if err != nil {
+		result.Error(ctx, err)
+		return
+	}
+
+	result.Success(ctx, posts)
+}
+
+func (api *postApi) FetchListByOrder(ctx *gin.Context) {
+	//可指定默认参数
+	req := &schema.PostFetchOrderRequest{}
+	if err := ctx.ShouldBindQuery(req); err != nil {
+		result.Error(ctx, err)
+		return
+	}
+
+	posts, err := api.service.FetchListByOrder(req)
 	if err != nil {
 		result.Error(ctx, err)
 		return
