@@ -12,8 +12,8 @@ import (
 var _ VoteCache = (*voteCache)(nil)
 
 type VoteCache interface {
-	Insert(postTimeKey, postScoreKey, postId string) (err error)
-	Vote(timeKey, scoreKey, votedKey, postId, uid string, period, unitScore, opinion float64) (err error)
+	Insert(id string) (err error)
+	Vote(id, uid string, opinion float64) (err error)
 	FetchIDs(start, end int64, orderBy string) ([]string, error)
 }
 
@@ -37,15 +37,18 @@ func (cache *voteCache) FetchIDs(start, end int64, orderBy string) ([]string, er
 	return cache.rdb.ZRevRange(key, start, end).Result()
 }
 
-func (cache *voteCache) Vote(timeKey, scoreKey, votedKey, postId, uid string, period, unitScore, opinion float64) (err error) {
+func (cache *voteCache) Vote(id, uid string, opinion float64) (err error) {
+
+	votedKey := cache.conf.PostVotedPrefix + id
+
 	//获取帖子发布时间
-	postTime, err := cache.rdb.ZScore(timeKey, postId).Result()
+	postTime, err := cache.rdb.ZScore(cache.conf.PostTimeKey, id).Result()
 	if err != nil {
 		return errx.ErrBeyondVotingPeriod
 	}
 
 	//帖子发布后一周内允许投票
-	if float64(time.Now().Unix())-postTime > period {
+	if float64(time.Now().Unix())-postTime > cache.conf.PostVotingPeriod {
 		return errx.ErrBeyondVotingPeriod
 	}
 
@@ -63,13 +66,13 @@ func (cache *voteCache) Vote(timeKey, scoreKey, votedKey, postId, uid string, pe
 		orientation = -1
 	}
 	diff := math.Abs(opinion - originOpinion)
-	score := orientation * diff * unitScore
+	score := orientation * diff * cache.conf.PostVoteUnitScore
 
 	//开始事务
 	pipeline := cache.rdb.TxPipeline()
 
 	//更新投票排行榜分数
-	pipeline.ZIncrBy(scoreKey, score, postId)
+	pipeline.ZIncrBy(cache.conf.PostScoreKey, score, id)
 
 	if opinion == 0 {
 		//删除用户投票信息
@@ -87,19 +90,19 @@ func (cache *voteCache) Vote(timeKey, scoreKey, votedKey, postId, uid string, pe
 	return err
 }
 
-func (cache *voteCache) Insert(postTimeKey, postScoreKey, postId string) (err error) {
+func (cache *voteCache) Insert(id string) (err error) {
 
 	//开启事务
 	pipeline := cache.rdb.TxPipeline()
 
-	pipeline.ZAdd(postTimeKey, redis.Z{
+	pipeline.ZAdd(cache.conf.PostTimeKey, redis.Z{
 		Score:  float64(time.Now().Unix()),
-		Member: postId,
+		Member: id,
 	})
 
-	pipeline.ZAdd(postScoreKey, redis.Z{
+	pipeline.ZAdd(cache.conf.PostScoreKey, redis.Z{
 		Score:  float64(time.Now().Unix()),
-		Member: postId,
+		Member: id,
 	})
 
 	_, err = pipeline.Exec()

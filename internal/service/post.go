@@ -1,7 +1,6 @@
 package service
 
 import (
-	"bluebell/internal/conf"
 	"bluebell/internal/data/cache"
 	"bluebell/internal/data/repo"
 	"bluebell/internal/entity"
@@ -25,7 +24,6 @@ type PostService interface {
 type postService struct {
 	repo  repo.PostRepo
 	cache cache.VoteCache
-	conf  *conf.Ranking
 }
 
 func (s *postService) FetchListByPaginate(req *schema.PostFetchPaginateRequest) (posts []*entity.Post, err error) {
@@ -79,8 +77,9 @@ func (s *postService) Create(req *schema.PostCreateRequest) (err error) {
 	if err = s.repo.Insert(&post); err != nil {
 		return err
 	}
+	id := strconv.FormatInt(post.ID, 10)
 
-	return s.cache.Insert(s.conf.PostTimeKey, s.conf.PostScoreKey, strconv.FormatInt(post.ID, 10))
+	return s.cache.Insert(id)
 }
 
 func (s *postService) Delete(postId int64) (err error) {
@@ -107,6 +106,6 @@ func (s *postService) FetchAll() (posts []*entity.Post, err error) {
 	return s.repo.FetchAll()
 }
 
-func NewPostService(repo repo.PostRepo, cache cache.VoteCache, conf *conf.Ranking) PostService {
-	return &postService{repo: repo, cache: cache, conf: conf}
+func NewPostService(repo repo.PostRepo, cache cache.VoteCache) PostService {
+	return &postService{repo: repo, cache: cache}
 }

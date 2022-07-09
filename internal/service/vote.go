@@ -10,7 +10,7 @@ import (
 var _ VoteService = (*voteService)(nil)
 
 type VoteService interface {
-	Vote(uid int64, req *schema.VotePostRequest) (err error)
+	Vote(userID int64, req *schema.VotePostRequest) (err error)
 }
 
 type voteService struct {
@@ -18,15 +18,13 @@ type voteService struct {
 	conf  *conf.Ranking
 }
 
-func (s *voteService) Vote(uid int64, req *schema.VotePostRequest) (err error) {
+func (s *voteService) Vote(userID int64, req *schema.VotePostRequest) (err error) {
 
-	uidStr := strconv.FormatInt(uid, 10)
-	postIdStr := strconv.FormatInt(req.PostID, 10)
+	id := strconv.FormatInt(req.PostID, 10)
+	uid := strconv.FormatInt(userID, 10)
 	opinion := float64(req.Opinion)
-	period := float64(s.conf.PostVotingPeriod)
-	votedKey := s.conf.PostVotedPrefix + strconv.FormatInt(req.PostID, 10)
 
-	return s.cache.Vote(s.conf.PostTimeKey, s.conf.PostScoreKey, votedKey, postIdStr, uidStr, period, s.conf.PostVoteUnitScore, opinion)
+	return s.cache.Vote(id, uid, opinion)
 }
 
 func NewVoteService(cache cache.VoteCache, conf *conf.Ranking) VoteService {
