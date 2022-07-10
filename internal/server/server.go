@@ -101,7 +101,7 @@ func NewServer(c *conf.Bootstrap) *Server {
 	//Service
 	userService := service.NewUserService(userRepo)
 	communityService := service.NewCommunityService(communityRepo)
-	postService := service.NewPostService(postRepo, voteCache)
+	postService := service.NewPostService(postRepo, userRepo, communityRepo, voteCache)
 	voteService := service.NewVoteService(voteCache, c.Ranking)
 
 	//Register Services

@@ -1,5 +1,7 @@
 package schema
 
+import "bluebell/internal/entity"
+
 type PostCreateRequest struct {
 	Title       string `json:"title" binding:"required,gte=6,lte=128"`
 	Content     string `json:"content" binding:"required,gte=6"`
@@ -22,4 +24,11 @@ type PostFetchOrderRequest struct {
 	OrderBy  string `form:"order_by"`
 	PageNum  int    `form:"page_num"`
 	PageSize int    `form:"page_size"`
+}
+
+type PostDetail struct {
+	AuthorName string
+	Community  *entity.Community
+	Likes      int64
+	Post       *entity.Post
 }

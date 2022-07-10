@@ -17,13 +17,15 @@ type PostService interface {
 	Update(req *schema.PostUpdateRequest) (err error)
 	FetchByID(postId int64) (post *entity.Post, err error)
 	FetchAll() (posts []*entity.Post, err error)
-	FetchListByOrder(req *schema.PostFetchOrderRequest) (posts []*entity.Post, err error)
+	FetchListByOrder(req *schema.PostFetchOrderRequest) (resp []*schema.PostDetail, err error)
 	FetchListByPaginate(req *schema.PostFetchPaginateRequest) (posts []*entity.Post, err error)
 }
 
 type postService struct {
-	repo  repo.PostRepo
-	cache cache.VoteCache
+	postRepo      repo.PostRepo
+	userRepo      repo.UserRepo
+	communityRepo repo.CommunityRepo
+	cache         cache.VoteCache
 }
 
 func (s *postService) FetchListByPaginate(req *schema.PostFetchPaginateRequest) (posts []*entity.Post, err error) {
@@ -32,10 +34,10 @@ func (s *postService) FetchListByPaginate(req *schema.PostFetchPaginateRequest) 
 	}
 	offset := (req.PageNum - 1) * req.PageSize
 	limit := req.PageSize
-	return s.repo.FetchListByPaginate(offset, limit)
+	return s.postRepo.FetchListByPaginate(offset, limit)
 }
 
-func (s *postService) FetchListByOrder(req *schema.PostFetchOrderRequest) (posts []*entity.Post, err error) {
+func (s *postService) FetchListByOrder(req *schema.PostFetchOrderRequest) (resp []*schema.PostDetail, err error) {
 	if req.PageNum <= 0 {
 		req.PageNum = 1
 	}
@@ -46,6 +48,11 @@ func (s *postService) FetchListByOrder(req *schema.PostFetchOrderRequest) (posts
 
 	//获取id
 	idsStr, err := s.cache.FetchIDs(start, end, req.OrderBy)
+	if err != nil {
+		return nil, err
+	}
+
+	likes, err := s.cache.CountLikes(idsStr)
 	if err != nil {
 		return nil, err
 	}
@@ -62,7 +69,33 @@ func (s *postService) FetchListByOrder(req *schema.PostFetchOrderRequest) (posts
 		return nil, nil
 	}
 
-	return s.repo.FetchListByIDs(ids)
+	posts, err := s.postRepo.FetchListByIDs(ids)
+	if err != nil {
+		return nil, err
+	}
+
+	resp = make([]*schema.PostDetail, 0, len(posts))
+
+	for _, post := range posts {
+		user, err := s.userRepo.FetchUserByID(post.ID)
+		if err != nil {
+			return nil, err
+		}
+		community, err := s.communityRepo.FetchOneById(post.CommunityId)
+		if err != nil {
+			return nil, err
+		}
+		postDetail := &schema.PostDetail{
+			AuthorName: user.Username,
+			Community:  community,
+			Likes:      likes[post.ID],
+			Post:       post,
+		}
+
+		resp = append(resp, postDetail)
+	}
+
+	return
 }
 
 func (s *postService) Create(req *schema.PostCreateRequest) (err error) {
@@ -74,7 +107,7 @@ func (s *postService) Create(req *schema.PostCreateRequest) (err error) {
 		AuthorId:    req.AuthorId,
 		CommunityId: req.CommunityId,
 	}
-	if err = s.repo.Insert(&post); err != nil {
+	if err = s.postRepo.Insert(&post); err != nil {
 		return err
 	}
 	id := strconv.FormatInt(post.ID, 10)
@@ -86,7 +119,7 @@ func (s *postService) Delete(postId int64) (err error) {
 	post := entity.Post{
 		ID: postId,
 	}
-	return s.repo.Delete(&post)
+	return s.postRepo.Delete(&post)
 }
 
 func (s *postService) Update(req *schema.PostUpdateRequest) (err error) {
@@ -95,17 +128,22 @@ func (s *postService) Update(req *schema.PostUpdateRequest) (err error) {
 		Title:   req.Title,
 		Content: req.Content,
 	}
-	return s.repo.Update(&post)
+	return s.postRepo.Update(&post)
 }
 
 func (s *postService) FetchByID(postId int64) (post *entity.Post, err error) {
-	return s.repo.FetchByID(postId)
+	return s.postRepo.FetchByID(postId)
 }
 
 func (s *postService) FetchAll() (posts []*entity.Post, err error) {
-	return s.repo.FetchAll()
+	return s.postRepo.FetchAll()
 }
 
-func NewPostService(repo repo.PostRepo, cache cache.VoteCache) PostService {
-	return &postService{repo: repo, cache: cache}
+func NewPostService(postRepo repo.PostRepo, userRepo repo.UserRepo, communityRepo repo.CommunityRepo, cache cache.VoteCache) PostService {
+	return &postService{
+		postRepo:      postRepo,
+		userRepo:      userRepo,
+		communityRepo: communityRepo,
+		cache:         cache,
+	}
 }

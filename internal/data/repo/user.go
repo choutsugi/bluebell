@@ -12,22 +12,34 @@ type UserRepo interface {
 	IsDuplicateUsername(username string) bool
 	IsDuplicateEmail(email string) bool
 	InsertUser(user *entity.User) error
-	FetchUserByEmail(email string) (*entity.User, error)
+	FetchUserByEmail(email string) (user *entity.User, err error)
+	FetchUserByID(uid int64) (user *entity.User, err error)
 }
 
 type userRepo struct {
 	db *gorm.DB
 }
 
-func (r *userRepo) FetchUserByEmail(email string) (*entity.User, error) {
-	var user entity.User
+func (r *userRepo) FetchUserByID(uid int64) (user *entity.User, err error) {
+	user = new(entity.User)
+	if err = r.db.First(user, uid).Error; err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return nil, errx.ErrEmailInvalid
+		}
+		return nil, err
+	}
+	return
+}
+
+func (r *userRepo) FetchUserByEmail(email string) (user *entity.User, err error) {
+	user = new(entity.User)
 	if err := r.db.Where("email = ?", email).First(&user).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return nil, errx.ErrEmailInvalid
 		}
 		return nil, err
 	}
-	return &user, nil
+	return
 }
 
 func (r *userRepo) InsertUser(user *entity.User) error {
