@@ -17,8 +17,9 @@ type PostApi interface {
 	Update(ctx *gin.Context)
 	FetchById(ctx *gin.Context)
 	FetchAll(ctx *gin.Context)
-	FetchListByOrder(ctx *gin.Context)
+	FetchListWithOrder(ctx *gin.Context)
 	FetchListByPaginate(ctx *gin.Context)
+	FetchListByCommunityWithOrder(ctx *gin.Context)
 }
 
 type postApi struct {
@@ -41,15 +42,31 @@ func (api *postApi) FetchListByPaginate(ctx *gin.Context) {
 	result.Success(ctx, posts)
 }
 
-func (api *postApi) FetchListByOrder(ctx *gin.Context) {
+func (api *postApi) FetchListWithOrder(ctx *gin.Context) {
 	//可指定默认参数
-	req := &schema.PostFetchOrderRequest{}
+	req := &schema.PostFetchWithOrderRequest{}
 	if err := ctx.ShouldBindQuery(req); err != nil {
 		result.Error(ctx, err)
 		return
 	}
 
-	posts, err := api.service.FetchListByOrder(req)
+	posts, err := api.service.FetchListWithOrder(req)
+	if err != nil {
+		result.Error(ctx, err)
+		return
+	}
+
+	result.Success(ctx, posts)
+}
+
+func (api *postApi) FetchListByCommunityWithOrder(ctx *gin.Context) {
+	req := &schema.PostFetchByCommunityWithOrderRequest{}
+	if err := ctx.ShouldBindQuery(req); err != nil {
+		result.Error(ctx, err)
+		return
+	}
+
+	posts, err := api.service.FetchListByCommunityWithOrder(req)
 	if err != nil {
 		result.Error(ctx, err)
 		return

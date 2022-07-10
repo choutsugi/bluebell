@@ -20,10 +20,17 @@ type PostFetchPaginateRequest struct {
 	PageSize int `form:"page_size"`
 }
 
-type PostFetchOrderRequest struct {
+type PostFetchWithOrderRequest struct {
 	OrderBy  string `form:"order_by"`
 	PageNum  int    `form:"page_num"`
 	PageSize int    `form:"page_size"`
+}
+
+type PostFetchByCommunityWithOrderRequest struct {
+	CommunityID int64  `form:"community_id"`
+	OrderBy     string `form:"order_by"`
+	PageNum     int    `form:"page_num"`
+	PageSize    int    `form:"page_size"`
 }
 
 type PostDetail struct {

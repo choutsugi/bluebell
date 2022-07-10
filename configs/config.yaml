@@ -36,6 +36,7 @@ jwt:
 ranking:
   post_time_key: "BLUEBELL_RANKING_POST_TIME"
   post_score_key: "BLUEBELL_RANKING_POST_SCORE"
-  post_voted_prefix: "BLUEBELL_RANKING_POST_VOTED_"
+  post_voted_key_prefix: "BLUEBELL_RANKING_POST_VOTED_"
+  post_community_key_prefix: "BLUEBELL_RANKING_POST_COMMUNITY_"
   post_voting_period: 604800
   post_vote_unit_score: 432

@@ -63,11 +63,12 @@ type Jwt struct {
 }
 
 type Ranking struct {
-	PostTimeKey       string  `mapstructure:"post_time_key"`
-	PostScoreKey      string  `mapstructure:"post_score_key"`
-	PostVotedPrefix   string  `mapstructure:"post_voted_prefix"`
-	PostVotingPeriod  float64 `mapstructure:"post_voting_period"`
-	PostVoteUnitScore float64 `mapstructure:"post_vote_unit_score"`
+	PostTimeKey            string  `mapstructure:"post_time_key"`
+	PostScoreKey           string  `mapstructure:"post_score_key"`
+	PostVotedKeyPrefix     string  `mapstructure:"post_voted_key_prefix"`
+	PostCommunityKeyPrefix string  `mapstructure:"post_community_key_prefix"`
+	PostVotingPeriod       float64 `mapstructure:"post_voting_period"`
+	PostVoteUnitScore      float64 `mapstructure:"post_vote_unit_score"`
 }
 
 var Boot = new(Bootstrap)
