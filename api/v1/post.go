@@ -19,7 +19,6 @@ type PostApi interface {
 	FetchAll(ctx *gin.Context)
 	FetchListWithOrder(ctx *gin.Context)
 	FetchListByPaginate(ctx *gin.Context)
-	FetchListByCommunityWithOrder(ctx *gin.Context)
 }
 
 type postApi struct {
@@ -44,29 +43,22 @@ func (api *postApi) FetchListByPaginate(ctx *gin.Context) {
 
 func (api *postApi) FetchListWithOrder(ctx *gin.Context) {
 	//可指定默认参数
-	req := &schema.PostFetchWithOrderRequest{}
+	req := &schema.PostFetch{}
 	if err := ctx.ShouldBindQuery(req); err != nil {
 		result.Error(ctx, err)
 		return
 	}
 
-	posts, err := api.service.FetchListWithOrder(req)
-	if err != nil {
-		result.Error(ctx, err)
-		return
+	var (
+		posts []*schema.PostDetail
+		err   error
+	)
+	if req.CommunityID == 0 {
+		posts, err = api.service.FetchListWithOrder(req)
+	} else {
+		posts, err = api.service.FetchListByCommunityWithOrder(req)
+
 	}
-
-	result.Success(ctx, posts)
-}
-
-func (api *postApi) FetchListByCommunityWithOrder(ctx *gin.Context) {
-	req := &schema.PostFetchByCommunityWithOrderRequest{}
-	if err := ctx.ShouldBindQuery(req); err != nil {
-		result.Error(ctx, err)
-		return
-	}
-
-	posts, err := api.service.FetchListByCommunityWithOrder(req)
 	if err != nil {
 		result.Error(ctx, err)
 		return

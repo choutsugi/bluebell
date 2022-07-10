@@ -17,9 +17,9 @@ type PostService interface {
 	Update(req *schema.PostUpdateRequest) (err error)
 	FetchByID(postId int64) (post *entity.Post, err error)
 	FetchAll() (posts []*entity.Post, err error)
-	FetchListWithOrder(req *schema.PostFetchWithOrderRequest) (resp []*schema.PostDetail, err error)
+	FetchListWithOrder(req *schema.PostFetch) (resp []*schema.PostDetail, err error)
 	FetchListByPaginate(req *schema.PostFetchPaginateRequest) (posts []*entity.Post, err error)
-	FetchListByCommunityWithOrder(req *schema.PostFetchByCommunityWithOrderRequest) (resp []*schema.PostDetail, err error)
+	FetchListByCommunityWithOrder(req *schema.PostFetch) (resp []*schema.PostDetail, err error)
 }
 
 type postService struct {
@@ -29,7 +29,7 @@ type postService struct {
 	cache         cache.VoteCache
 }
 
-func (s *postService) FetchListByCommunityWithOrder(req *schema.PostFetchByCommunityWithOrderRequest) (resp []*schema.PostDetail, err error) {
+func (s *postService) FetchListByCommunityWithOrder(req *schema.PostFetch) (resp []*schema.PostDetail, err error) {
 	if req.PageNum <= 0 {
 		req.PageNum = 1
 	}
@@ -99,7 +99,7 @@ func (s *postService) FetchListByPaginate(req *schema.PostFetchPaginateRequest) 
 	return s.postRepo.FetchListByPaginate(offset, limit)
 }
 
-func (s *postService) FetchListWithOrder(req *schema.PostFetchWithOrderRequest) (resp []*schema.PostDetail, err error) {
+func (s *postService) FetchListWithOrder(req *schema.PostFetch) (resp []*schema.PostDetail, err error) {
 	if req.PageNum <= 0 {
 		req.PageNum = 1
 	}
