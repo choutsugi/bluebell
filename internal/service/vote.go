@@ -1,7 +1,6 @@
 package service
 
 import (
-	"bluebell/internal/conf"
 	"bluebell/internal/data/cache"
 	"bluebell/internal/schema"
 	"strconv"
@@ -15,7 +14,6 @@ type VoteService interface {
 
 type voteService struct {
 	cache cache.VoteCache
-	conf  *conf.Ranking
 }
 
 func (s *voteService) Vote(userID int64, req *schema.VotePostRequest) (err error) {
@@ -27,6 +25,6 @@ func (s *voteService) Vote(userID int64, req *schema.VotePostRequest) (err error
 	return s.cache.Vote(id, uid, opinion)
 }
 
-func NewVoteService(cache cache.VoteCache, conf *conf.Ranking) VoteService {
-	return &voteService{cache: cache, conf: conf}
+func NewVoteService(cache cache.VoteCache) VoteService {
+	return &voteService{cache: cache}
 }

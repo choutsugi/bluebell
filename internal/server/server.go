@@ -53,40 +53,40 @@ func (srv *Server) Run() {
 	}
 }
 
-func NewServer(c *conf.Bootstrap) *Server {
+func NewServer(config *conf.Bootstrap) *Server {
 
 	//初始化日志
 	logConfig := logger.Config{
-		Level:      c.Log.Level,
-		FileName:   c.Log.FileName,
-		MaxSize:    c.Log.MaxSize,
-		MaxAge:     c.Log.MaxAge,
-		MaxBackups: c.Log.MaxBackups,
+		Level:      config.Log.Level,
+		FileName:   config.Log.FileName,
+		MaxSize:    config.Log.MaxSize,
+		MaxAge:     config.Log.MaxAge,
+		MaxBackups: config.Log.MaxBackups,
 	}
 	if err := logger.Init(logConfig); err != nil {
 		panic(err)
 	}
 
 	//初始化雪花算法
-	if err := snowflake.Init(c.SnowFlake.StartTime, c.SnowFlake.MachineId); err != nil {
+	if err := snowflake.Init(config.SnowFlake.StartTime, config.SnowFlake.MachineId); err != nil {
 		panic(err)
 	}
 
 	//建立数据库连接
-	db := data.NewDataSource(c.Data.DataSource)
-	rdb := data.NewCache(c.Data.Cache)
+	db := data.NewDataSource(config.Data.DataSource)
+	rdb := data.NewCache(config.Data.Cache)
 	database := data.NewData(db, rdb)
 
 	//初始化jwt
 	jwtConfig := auth.Config{
-		TokenType:            c.Jwt.TokenType,
-		Issuer:               c.Jwt.Issuer,
-		Secret:               c.Jwt.Secret,
-		TTL:                  c.Jwt.TTL,
-		BlacklistKeyPrefix:   c.Jwt.BlacklistKeyPrefix,
-		BlacklistGracePeriod: c.Jwt.BlacklistGracePeriod,
-		RefreshGracePeriod:   c.Jwt.RefreshGracePeriod,
-		RefreshLockName:      c.Jwt.RefreshLockName,
+		TokenType:            config.Jwt.TokenType,
+		Issuer:               config.Jwt.Issuer,
+		Secret:               config.Jwt.Secret,
+		TTL:                  config.Jwt.TTL,
+		BlacklistKeyPrefix:   config.Jwt.BlacklistKeyPrefix,
+		BlacklistGracePeriod: config.Jwt.BlacklistGracePeriod,
+		RefreshGracePeriod:   config.Jwt.RefreshGracePeriod,
+		RefreshLockName:      config.Jwt.RefreshLockName,
 	}
 	auth.Init(jwtConfig, rdb)
 
@@ -96,20 +96,20 @@ func NewServer(c *conf.Bootstrap) *Server {
 	postRepo := repo.NewPostRepo(database.DB)
 
 	//Cache
-	voteCache := cache.NewVoteCache(rdb, c.Ranking)
+	voteCache := cache.NewVoteCache(rdb, config.Ranking)
 
 	//Service
 	userService := service.NewUserService(userRepo)
 	communityService := service.NewCommunityService(communityRepo)
 	postService := service.NewPostService(postRepo, userRepo, communityRepo, voteCache)
-	voteService := service.NewVoteService(voteCache, c.Ranking)
+	voteService := service.NewVoteService(voteCache)
 
 	//Register Services
 	api := v1.Register(userService, communityService, postService, voteService)
 
 	srv := &Server{
-		addr:    c.App.Addr,
-		handler: router.Setup(api),
+		addr:    config.App.Addr,
+		handler: router.Setup(api, config),
 	}
 	return srv
 }

@@ -4,6 +4,7 @@ import "bluebell/internal/pkg/codes"
 
 var (
 	ErrInternalServerError       = New(codes.ErrInternalServerError)
+	ErrInternalServerBusy        = New(codes.ErrInternalServerBusy)
 	ErrRequestParamsInvalid      = New(codes.ErrRequestParamsInvalid)
 	ErrEmailInvalid              = New(codes.ErrEmailInvalid)
 	ErrEmailHasRegistered        = New(codes.ErrEmailHasRegistered)

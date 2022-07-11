@@ -5,6 +5,7 @@ const defaultMessage = "CODE_INTERNAL_SERVER_ERROR"
 const (
 	Success                      = "CODE_SUCCESS"
 	ErrInternalServerError       = "CODE_INTERNAL_SERVER_ERROR"
+	ErrInternalServerBusy        = "CODE_INTERNAL_SERVER_BUSY"
 	ErrRequestParamsInvalid      = "CODE_REQUEST_PARAMS_INVALID"
 	ErrEmailInvalid              = "CODE_EMAIL_INVALID"
 	ErrEmailHasRegistered        = "CODE_EMAIL_HAS_REGISTERED"
@@ -34,6 +35,7 @@ var maps = map[string]string{
 	ErrUserNotCertified:          "用户未登录",
 	ErrBeyondVotingPeriod:        "超出投票时段",
 	ErrDuplicateVotingNotAllowed: "不允许重复投票",
+	ErrInternalServerBusy:        "服务器繁忙",
 }
 
 func GetMsg(code string) string {

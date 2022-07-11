@@ -2,15 +2,21 @@ package router
 
 import (
 	"bluebell/api/v1"
+	"bluebell/internal/conf"
 	"bluebell/internal/middlerware"
 	"github.com/gin-gonic/gin"
 	"net/http"
+	"time"
 )
 
-func Setup(api v1.Api) *gin.Engine {
+func Setup(api v1.Api, config *conf.Bootstrap) *gin.Engine {
 	r := gin.New()
 
-	r.Use(middlerware.Logger(), middlerware.Recovery(true))
+	r.Use(
+		middlerware.Logger(),
+		middlerware.Recovery(true),
+		middlerware.RateLimit(time.Second*time.Duration(config.RateLimit.FillInterval), config.RateLimit.Capacity),
+	)
 	r.NoRoute(func(ctx *gin.Context) {
 		ctx.JSON(http.StatusNotFound, gin.H{
 			"message": "404",

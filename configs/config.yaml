@@ -40,3 +40,7 @@ ranking:
   post_community_key_prefix: "BLUEBELL_RANKING_POST_COMMUNITY_"
   post_voting_period: 604800
   post_vote_unit_score: 432
+
+ratelimit:
+  fill_interval: 2  #令牌桶填充速率，每2秒生成一个令牌
+  capacity: 150     #令牌桶容量

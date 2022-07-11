@@ -14,6 +14,7 @@ type Bootstrap struct {
 	SnowFlake *SnowFlake `mapstructure:"snowflake"`
 	Jwt       *Jwt       `mapstructure:"jwt"`
 	Ranking   *Ranking   `mapstructure:"ranking"`
+	RateLimit *RateLimit `mapstructure:"ratelimit"`
 }
 
 type App struct {
@@ -69,6 +70,11 @@ type Ranking struct {
 	PostCommunityKeyPrefix string  `mapstructure:"post_community_key_prefix"`
 	PostVotingPeriod       float64 `mapstructure:"post_voting_period"`
 	PostVoteUnitScore      float64 `mapstructure:"post_vote_unit_score"`
+}
+
+type RateLimit struct {
+	FillInterval int64 `mapstructure:"fill_interval"`
+	Capacity     int64 `mapstructure:"capacity"`
 }
 
 var Boot = new(Bootstrap)
